@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TripBook Admin</title>
+<style>
+:root{--brown:#6b3a2a;--gold:#c8972a;--cream:#fdf6ee;--border:#e8ddd0;--muted:#9e8a78;--red:#c0392b;--amber:#d4830a;--wa:#25D366;--wa-dark:#128C7E;--green:#2e7d32;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1610;color:#f0e8dc;min-height:100vh}
+header{background:#111;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold)}
+.logo{font-size:1.3rem;font-weight:800;color:#fff}.logo span{color:var(--gold)}
+.badge{background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:4px;margin-left:0.5rem;letter-spacing:1px}
+.back-btn{color:var(--muted);font-size:0.8rem;text-decoration:none;cursor:pointer}.back-btn:hover{color:var(--gold)}
+/* LOGIN */
+.login-wrap{max-width:360px;margin:5rem auto;padding:1.5rem;background:#26211a;border-radius:14px;border:1px solid #3a3028;box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+.login-wrap h2{color:var(--gold);margin-bottom:0.3rem}
+.login-wrap p{color:var(--muted);font-size:0.82rem;margin-bottom:1.5rem}
+.ifield{width:100%;padding:0.65rem 0.9rem;border:1px solid #3a3028;border-radius:8px;font-size:0.9rem;background:#1a1610;color:#f0e8dc;margin-bottom:0.8rem;font-family:inherit}
+.ifield:focus{outline:none;border-color:var(--gold)}
+select.ifield{cursor:pointer}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+.btn-gold{background:var(--gold);color:#fff;justify-content:center}.btn-gold:hover{background:#a87820}
+.btn-full{width:100%}
+.btn-sm{padding:0.32rem 0.75rem;font-size:0.76rem}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid #3a3028}.btn-ghost:hover{border-color:var(--gold)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#96281b}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#1b5e20}
+.btn-wa{background:var(--wa-dark);color:#fff}.btn-wa:hover{background:#075E54}
+.err{color:#e74c3c;font-size:0.8rem;margin-top:0.3rem;min-height:1em}
+.ok-msg{color:#81c784;font-size:0.8rem;margin-top:0.3rem;min-height:1em}
+/* CONFIG PANEL */
+.config-panel{max-width:640px;margin:2rem auto;padding:1.5rem;background:#26211a;border-radius:14px;border:1px solid var(--gold);display:none}
+.config-panel h3{color:var(--gold);margin-bottom:0.5rem}
+.config-panel p{color:var(--muted);font-size:0.82rem;margin-bottom:1.2rem;line-height:1.6}
+.config-panel label{display:block;font-size:0.78rem;color:var(--gold);margin-bottom:0.3rem;margin-top:0.8rem;font-weight:600}
+.save-note{background:#1a3a1a;border:1px solid #2e7d32;border-radius:8px;padding:0.8rem;font-size:0.8rem;color:#81c784;margin-top:1rem;line-height:1.6}
+/* TABS */
+#dashboard{display:none;max-width:1300px;margin:0 auto;padding:0 1rem 4rem}
+.tab-bar{display:flex;gap:0;border-bottom:2px solid #3a3028;margin-bottom:1.2rem;padding-top:0.8rem}
+.tab-btn{padding:0.55rem 1.2rem;background:none;border:none;color:var(--muted);font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s}
+.tab-btn:hover{color:var(--gold)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* DASHBOARD TAB */
+.dash-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.7rem;margin-bottom:1rem}
+.dash-top h2{color:var(--gold);font-size:1.1rem}
+.actions{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1rem}
+.stat{background:#26211a;border-radius:10px;padding:0.8rem 1rem;border:1px solid #3a3028}
+.stat strong{display:block;font-size:1.35rem;color:var(--gold)}.stat span{font-size:0.76rem;color:var(--muted)}
+.stat.warn strong{color:var(--red)}.stat.pend strong{color:var(--amber)}.stat.ok strong{color:#81c784}
+.search{background:#26211a;border:1px solid #3a3028;border-radius:8px;padding:0.5rem 0.8rem;color:#f0e8dc;font-size:0.88rem;width:100%;max-width:280px;font-family:inherit}
+.search:focus{outline:none;border-color:var(--gold)}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #3a3028}
+table{width:100%;border-collapse:collapse;font-size:0.8rem;background:#1e1a14}
+thead th{background:#2e2820;color:var(--gold);padding:0.6rem 0.5rem;text-align:left;white-space:nowrap;font-weight:700;border-bottom:1px solid #3a3028}
+tbody td{padding:0.5rem 0.5rem;border-bottom:1px solid #2e2820;vertical-align:middle;color:#d4c4b0}
+tbody tr:hover td{background:#26211a}
+.sbadge{padding:0.18rem 0.5rem;border-radius:4px;font-size:0.68rem;font-weight:700}
+.s-ok{background:#1a3a1a;color:#81c784}.s-dbl{background:#3a1a1a;color:#ef9a9a}
+.wa-btn{display:inline-block;background:var(--wa-dark);color:#fff;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.7rem;text-decoration:none;white-space:nowrap}.wa-btn:hover{background:#075E54}
+.fi{width:62px;padding:0.22rem 0.35rem;border:1px solid #3a3028;border-radius:4px;font-size:0.76rem;background:#1a1610;color:#f0e8dc}
+.set-btn{background:var(--gold);color:#fff;border:none;padding:0.26rem 0.55rem;border-radius:4px;font-size:0.7rem;cursor:pointer;font-weight:700;white-space:nowrap}.set-btn:hover{background:#a87820}
+.edit-btn{background:#2e2820;color:var(--gold);border:1px solid #3a3028;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.7rem;cursor:pointer;white-space:nowrap}.edit-btn:hover{border-color:var(--gold)}
+/* SETTINGS TAB */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1rem}
+.settings-card{background:#26211a;border-radius:12px;padding:1.2rem;border:1px solid #3a3028}
+.settings-card h3{color:var(--gold);font-size:0.95rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:0.4rem}
+.settings-card p{color:var(--muted);font-size:0.78rem;margin-bottom:1rem;line-height:1.5}
+.settings-card label{display:block;font-size:0.78rem;color:var(--gold);font-weight:600;margin-bottom:0.3rem;margin-top:0.6rem}
+.settings-card label:first-of-type{margin-top:0}
+.field-row{display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:0.6rem}
+.field-row .ifield{margin-bottom:0;flex:1}
+/* SYNC STATUS */
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:0.4rem}
+.sync-dot.live{background:#25D366;animation:pulse 2s infinite}
+.sync-dot.local{background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}.overlay.open{display:flex}
+.modal{background:#26211a;border-radius:12px;padding:1.4rem;max-width:420px;width:100%;border:1px solid #3a3028;max-height:90vh;overflow-y:auto}
+.modal h3{color:var(--gold);margin-bottom:1rem}
+/* DANGER ZONE */
+.danger-zone{border:1px solid var(--red);border-radius:8px;padding:0.8rem 1rem;margin-top:0.5rem}
+.danger-zone p{color:#ef9a9a;font-size:0.78rem;margin-bottom:0.6rem}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Trip<span>Book</span><span class="badge">ADMIN</span></div>
+  <a class="back-btn" href="index.html">&#8592; Booking Page</a>
+</header>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <h2>&#128274; Admin Login</h2>
+    <p>This area is restricted to authorised personnel only.</p>
+    <input class="ifield" type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-gold btn-full" onclick="doLogin()">Login &#8594;</button>
+  </div>
+</div>
+
+<!-- FIREBASE CONFIG PANEL -->
+<div class="config-panel" id="configPanel">
+  <h3>&#9881; Connect Firebase</h3>
+  <p>Paste your Firebase config below. You only need to do this once.<br/>
+  Get it from: <strong>Firebase Console → Project Settings → Your Apps → SDK setup</strong></p>
+  <label>API Key</label><input class="ifield" id="cfg-apiKey" placeholder="AIzaSy..."/>
+  <label>Project ID</label><input class="ifield" id="cfg-projectId" placeholder="your-project-id"/>
+  <label>App ID</label><input class="ifield" id="cfg-appId" placeholder="1:123456789:web:abc..."/>
+  <label>Messaging Sender ID</label><input class="ifield" id="cfg-senderId" placeholder="123456789"/>
+  <div class="save-note">✅ After saving, bookings from ALL devices sync here in real-time.</div>
+  <div style="display:flex;gap:0.6rem;margin-top:1rem">
+    <button class="btn btn-ghost" onclick="skipConfig()">Skip for now</button>
+    <button class="btn btn-gold" style="flex:1" onclick="saveConfig()">Save &amp; Connect &#10003;</button>
+  </div>
+  <div class="err" id="cfgErr"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('bookings')">📋 Bookings</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <!-- ── BOOKINGS TAB ── -->
+  <div class="tab-panel active" id="tab-bookings">
+    <div class="dash-top">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <h2>All Bookings</h2>
+        <span id="syncStatus" style="font-size:0.75rem;color:var(--muted)"></span>
+      </div>
+      <div class="actions">
+        <input class="search" type="text" placeholder="🔍 Search..." oninput="renderTable(this.value)"/>
+        <button class="btn btn-ghost btn-sm" onclick="exportExcel()">📥 Export</button>
+        <button class="btn btn-red btn-sm" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+    <div class="stats" id="statsGrid"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Ref</th><th>Date</th><th>Day</th><th>Name</th>
+          <th>WhatsApp</th><th>Route</th><th>Notes</th><th>KM</th>
+          <th>Fee</th><th>Action</th><th>Status</th><th>Edit</th>
+        </tr></thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS TAB ── -->
+  <div class="tab-panel" id="tab-settings">
+    <h2 style="color:var(--gold);margin-bottom:1rem">⚙️ Settings</h2>
+    <div class="settings-grid">
+
+      <!-- Admin Contact -->
+      <div class="settings-card">
+        <h3>💬 Admin WhatsApp</h3>
+        <p>The number that receives booking notifications. Include country code, no + or spaces.</p>
+        <label>WhatsApp Number</label>
+        <div class="field-row">
+          <input class="ifield" type="tel" id="s-phone" placeholder="254712345678"/>
+          <button class="btn btn-gold btn-sm" onclick="saveSettingPhone()">Save</button>
+        </div>
+        <div class="ok-msg" id="s-phone-ok"></div>
+      </div>
+
+      <!-- Business Name -->
+      <div class="settings-card">
+        <h3>🚌 Business Name</h3>
+        <p>Shown in WhatsApp messages sent to customers.</p>
+        <label>Business / Operator Name</label>
+        <div class="field-row">
+          <input class="ifield" type="text" id="s-bizname" placeholder="e.g. Senator Mugambi Imanyara"/>
+          <button class="btn btn-gold btn-sm" onclick="saveSettingBizName()">Save</button>
+        </div>
+        <div class="ok-msg" id="s-bizname-ok"></div>
+      </div>
+
+      <!-- Default Fee -->
+      <div class="settings-card">
+        <h3>💰 Default Fee Rates</h3>
+        <p>These values auto-fill when you set a fee for any booking.</p>
+        <label>Default Price per KM (KSh)</label>
+        <div class="field-row">
+          <input class="ifield" type="number" id="s-ppkm" placeholder="50"/>
+          <button class="btn btn-gold btn-sm" onclick="saveSettingRates()">Save</button>
+        </div>
+        <label>Default Driver Fee (KSh)</label>
+        <input class="ifield" type="number" id="s-driver" placeholder="1500" style="margin-bottom:0.6rem"/>
+        <div class="ok-msg" id="s-rates-ok"></div>
+      </div>
+
+      <!-- Password -->
+      <div class="settings-card">
+        <h3>🔑 Change Password</h3>
+        <p>Change your admin login password. Minimum 6 characters.</p>
+        <label>Current Password</label>
+        <input class="ifield" type="password" id="s-curpass" placeholder="Current password"/>
+        <label>New Password</label>
+        <input class="ifield" type="password" id="s-newpass" placeholder="New password (min 6 chars)"/>
+        <label>Confirm New Password</label>
+        <input class="ifield" type="password" id="s-conpass" placeholder="Confirm new password"/>
+        <div class="err" id="s-pass-err"></div>
+        <button class="btn btn-gold btn-full" style="margin-top:0.5rem" onclick="saveSettingPass()">Change Password</button>
+      </div>
+
+      <!-- Firebase Config -->
+      <div class="settings-card">
+        <h3>🔥 Firebase Connection</h3>
+        <p>Update your Firebase config if you need to reconnect or switch projects.</p>
+        <label>API Key</label>
+        <input class="ifield" type="text" id="s-apikey" placeholder="AIzaSy..."/>
+        <label>Project ID</label>
+        <input class="ifield" type="text" id="s-projectid" placeholder="your-project-id"/>
+        <label>App ID</label>
+        <input class="ifield" type="text" id="s-appid" placeholder="1:123456789:web:abc..."/>
+        <label>Messaging Sender ID</label>
+        <input class="ifield" type="text" id="s-senderid" placeholder="123456789"/>
+        <div class="ok-msg" id="s-firebase-ok"></div>
+        <button class="btn btn-gold btn-full" style="margin-top:0.8rem" onclick="saveSettingFirebase()">Save &amp; Reconnect</button>
+      </div>
+
+      <!-- WhatsApp Message Templates -->
+      <div class="settings-card">
+        <h3>📝 WhatsApp Message Preview</h3>
+        <p>This is the fee message sent to customers. It uses your business name and booking details automatically.</p>
+        <div style="background:#1a1610;border:1px solid #3a3028;border-radius:8px;padding:0.8rem;font-size:0.78rem;color:#d4c4b0;line-height:1.7;white-space:pre-wrap" id="msgPreview"></div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-card">
+        <h3 style="color:var(--red)">⚠️ Danger Zone</h3>
+        <p>These actions cannot be undone. Use with caution.</p>
+        <div class="danger-zone">
+          <p>Clear all bookings from local storage. This does NOT delete Firebase data.</p>
+          <button class="btn btn-red btn-sm" onclick="clearLocalData()">🗑 Clear Local Data</button>
+        </div>
+        <div class="danger-zone" style="margin-top:0.7rem">
+          <p>Disconnect Firebase and re-enter config on next login.</p>
+          <button class="btn btn-red btn-sm" onclick="disconnectFirebase()">🔌 Disconnect Firebase</button>
+        </div>
+      </div>
+
+    </div><!-- end settings-grid -->
+  </div><!-- end tab-settings -->
+</div><!-- end dashboard -->
+
+<!-- EDIT BOOKING MODAL -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <h3>✏️ Edit Booking</h3>
+    <input type="hidden" id="edit-ref"/>
+    <input type="hidden" id="edit-docid"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Date</label>
+    <input class="ifield" type="date" id="edit-date"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Name</label>
+    <input class="ifield" type="text" id="edit-name"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">WhatsApp</label>
+    <input class="ifield" type="tel" id="edit-phone"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">From</label>
+    <input class="ifield" type="text" id="edit-from"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">To</label>
+    <input class="ifield" type="text" id="edit-to"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Notes</label>
+    <input class="ifield" type="text" id="edit-notes"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Status</label>
+    <select class="ifield" id="edit-status">
+      <option value="">— Select status —</option>
+      <option value="Confirmed">Confirmed</option>
+      <option value="Pending">Pending</option>
+      <option value="Cancelled">Cancelled</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <div class="err" id="edit-err"></div>
+    <div style="display:flex;gap:0.6rem;margin-top:0.8rem">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="deleteBooking()">🗑 Delete</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="saveEditBooking()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getFirestore,collection,onSnapshot,doc,setDoc,updateDoc,deleteDoc,query,orderBy}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function getAdminPass(){return localStorage.getItem('tripbook_admin_pass')||'admin123';}
+function getSetting(k,def=''){return localStorage.getItem('tripbook_'+k)||def;}
+function saveSetting(k,v){localStorage.setItem('tripbook_'+k,v);}
+
+let ADMIN_PHONE = getSetting('admin_phone','254712000000');
+let BIZ_NAME    = getSetting('biz_name','Senator Mugambi Imanyara');
+let DEF_PPKM    = parseFloat(getSetting('def_ppkm','50'));
+let DEF_DRIVER  = parseFloat(getSetting('def_driver','1500'));
+
+let db=null, allBookings=[], unsubscribe=null;
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+window.switchTab=function(tab){
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',['bookings','settings'][i]===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='settings') loadSettingsForm();
+};
+
+// ── AUTH ───────────────────────────────────────────────────────────────────
+window.doLogin=function(){
+  const pass=document.getElementById('adminPass').value;
+  if(pass!==getAdminPass()){document.getElementById('loginErr').textContent='❌ Incorrect password.';return;}
+  document.getElementById('loginScreen').style.display='none';
+  const saved=getSavedConfig();
+  if(!saved){document.getElementById('configPanel').style.display='block';}
+  else{initFirebase(buildConfig(saved));}
+};
+document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
+window.doLogout=function(){
+  if(unsubscribe)unsubscribe();
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('loginScreen').style.display='block';
+  document.getElementById('adminPass').value='';
+  document.getElementById('loginErr').textContent='';
+};
+
+// ── FIREBASE CONFIG ────────────────────────────────────────────────────────
+function getSavedConfig(){try{return JSON.parse(localStorage.getItem('tripbook_firebase_config')||'null');}catch{return null;}}
+function buildConfig(cfg){return{apiKey:cfg.apiKey,authDomain:`${cfg.projectId}.firebaseapp.com`,projectId:cfg.projectId,storageBucket:`${cfg.projectId}.appspot.com`,messagingSenderId:cfg.senderId,appId:cfg.appId};}
+
+window.saveConfig=function(){
+  const cfg={apiKey:document.getElementById('cfg-apiKey').value.trim(),projectId:document.getElementById('cfg-projectId').value.trim(),appId:document.getElementById('cfg-appId').value.trim(),senderId:document.getElementById('cfg-senderId').value.trim()};
+  if(!cfg.apiKey||!cfg.projectId){document.getElementById('cfgErr').textContent='❌ API Key and Project ID are required.';return;}
+  localStorage.setItem('tripbook_firebase_config',JSON.stringify(cfg));
+  document.getElementById('configPanel').style.display='none';
+  initFirebase(buildConfig(cfg));
+};
+window.skipConfig=function(){
+  document.getElementById('configPanel').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  loadLocalBookings(); setSyncStatus(false);
+};
+
+function initFirebase(config){
+  try{
+    const app=initializeApp(config); db=getFirestore(app);
+    document.getElementById('dashboard').style.display='block';
+    setSyncStatus(true);
+    const q=query(collection(db,'bookings'),orderBy('date'));
+    unsubscribe=onSnapshot(q,snap=>{
+      allBookings=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderTable(document.querySelector('.search')?.value||'');
+    },err=>{console.error(err);setSyncStatus(false);loadLocalBookings();});
+    // Load settings from Firestore
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({getDoc})=>{
+      getDoc(doc(db,'meta','settings')).then(s=>{
+        if(s.exists()){
+          const d=s.data();
+          if(d.adminPhone){ADMIN_PHONE=d.adminPhone;saveSetting('admin_phone',d.adminPhone);}
+          if(d.bizName){BIZ_NAME=d.bizName;saveSetting('biz_name',d.bizName);}
+          if(d.defPpkm){DEF_PPKM=d.defPpkm;saveSetting('def_ppkm',d.defPpkm);}
+          if(d.defDriver){DEF_DRIVER=d.defDriver;saveSetting('def_driver',d.defDriver);}
+        }
+      });
+    });
+  }catch(e){
+    alert('❌ Firebase connection failed.\n\nError: '+e.message);
+    document.getElementById('configPanel').style.display='block';
+  }
+}
+function setSyncStatus(live){
+  document.getElementById('syncStatus').innerHTML=`<span class="sync-dot ${live?'live':'local'}"></span>${live?'Live — syncing in real-time':'Local only'}`;
+}
+function loadLocalBookings(){try{allBookings=JSON.parse(localStorage.getItem('tripbook_private_v3')||'[]');}catch{allBookings=[];}renderTable('');}
+
+// ── TABLE ──────────────────────────────────────────────────────────────────
+window.renderTable=function(search=''){
+  let data=[...allBookings].sort((a,b)=>a.date>b.date?1:-1);
+  if(search){const q=search.toLowerCase();data=data.filter(b=>[b.name,b.from,b.to,b.phone,b.ref,b.notes,b.date].join(' ').toLowerCase().includes(q));}
+  const totalRev=data.reduce((s,b)=>s+(+b.total||0),0);
+  const doubles=data.filter(b=>b.isDouble).length;
+  const pending=data.filter(b=>!b.feeSet).length;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat"><strong>${data.length}</strong><span>Total Bookings</span></div>
+    <div class="stat ok"><strong>KSh ${totalRev.toLocaleString()}</strong><span>Revenue</span></div>
+    <div class="stat warn"><strong>${doubles}</strong><span>Double-Bookings ⚠</span></div>
+    <div class="stat pend"><strong>${pending}</strong><span>Fees Pending ⏳</span></div>
+    <div class="stat"><strong>+${ADMIN_PHONE}</strong><span>Admin WhatsApp</span></div>`;
+  const tbody=document.getElementById('tBody');
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="13" style="text-align:center;padding:2rem;color:var(--muted)">No bookings found</td></tr>`;return;}
+  tbody.innerHTML=data.map((b,i)=>{
+    const statusColor=b.status==='Confirmed'?'#81c784':b.status==='Cancelled'?'#ef9a9a':b.status==='Completed'?'var(--gold)':'var(--muted)';
+    return`<tr>
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-weight:700;color:var(--gold);white-space:nowrap">${b.ref}</td>
+      <td style="white-space:nowrap">${b.date}</td>
+      <td style="white-space:nowrap">${b.day||'—'}</td>
+      <td><strong>${b.name||'—'}</strong></td>
+      <td><a class="wa-btn" href="https://wa.me/${b.phone}" target="_blank">+${b.phone||'—'}</a></td>
+      <td style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis">${b.from||'?'} → ${b.to||'?'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${b.notes||'—'}</td>
+      <td>${b.feeSet?`<span style="color:var(--gold)">${b.km} km</span>`:`<input class="fi" type="number" placeholder="KM" value="${b.km||''}" id="km-${b.ref}"/>`}</td>
+      <td>${b.feeSet?`<strong style="color:#81c784">KSh ${Number(b.total).toLocaleString()}</strong>`:`
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <input class="fi" type="number" placeholder="KSh/km" value="${b.ppkm||DEF_PPKM}" id="ppkm-${b.ref}"/>
+          <input class="fi" type="number" placeholder="Driver" value="${b.driver||DEF_DRIVER}" id="drv-${b.ref}"/>
+        </div>`}</td>
+      <td>${b.feeSet
+        ?`<a class="wa-btn" href="${waLink(b.phone,buildFeeMsg(b))}" target="_blank">💬 Resend</a>`
+        :`<button class="set-btn" onclick="saveFee('${b.ref}','${b.id||''}')">✓ Set &amp; Send</button>`}</td>
+      <td><span class="sbadge ${b.isDouble?'s-dbl':'s-ok'}" style="${b.status?`color:${statusColor}`:''}">
+        ${b.status||( b.isDouble?'Double':'OK')}</span></td>
+      <td><button class="edit-btn" onclick="openEditModal('${b.ref}')">✏️ Edit</button></td>
+    </tr>`;
+  }).join('');
+};
+
+window.saveFee=async function(ref,docId){
+  const km=parseFloat(document.getElementById('km-'+ref)?.value)||0;
+  const ppkm=parseFloat(document.getElementById('ppkm-'+ref)?.value)||DEF_PPKM;
+  const drv=parseFloat(document.getElementById('drv-'+ref)?.value)||DEF_DRIVER;
+  const total=(km*ppkm)+drv;
+  const updates={km,ppkm,driver:drv,total,feeSet:true};
+  if(db&&docId){try{await updateDoc(doc(db,'bookings',docId),updates);}catch(e){console.error(e);}}
+  const idx=allBookings.findIndex(b=>b.ref===ref);
+  if(idx>-1)allBookings[idx]={...allBookings[idx],...updates};
+  const booking=allBookings.find(b=>b.ref===ref);
+  if(booking)window.open(waLink(booking.phone,buildFeeMsg({...booking,...updates})),'_blank');
+  renderTable(document.querySelector('.search')?.value||'');
+};
+
+// ── EDIT BOOKING MODAL ─────────────────────────────────────────────────────
+window.openEditModal=function(ref){
+  const b=allBookings.find(x=>x.ref===ref); if(!b) return;
+  document.getElementById('edit-ref').value=ref;
+  document.getElementById('edit-docid').value=b.id||'';
+  document.getElementById('edit-date').value=b.date||'';
+  document.getElementById('edit-name').value=b.name||'';
+  document.getElementById('edit-phone').value=b.phone||'';
+  document.getElementById('edit-from').value=b.from||'';
+  document.getElementById('edit-to').value=b.to||'';
+  document.getElementById('edit-notes').value=b.notes||'';
+  document.getElementById('edit-status').value=b.status||'';
+  document.getElementById('edit-err').textContent='';
+  document.getElementById('editOverlay').classList.add('open');
+};
+window.closeEditModal=()=>document.getElementById('editOverlay').classList.remove('open');
+window.saveEditBooking=async function(){
+  const ref=document.getElementById('edit-ref').value;
+  const docId=document.getElementById('edit-docid').value;
+  const updates={
+    date:document.getElementById('edit-date').value,
+    name:document.getElementById('edit-name').value.trim(),
+    phone:document.getElementById('edit-phone').value.trim(),
+    from:document.getElementById('edit-from').value.trim(),
+    to:document.getElementById('edit-to').value.trim(),
+    notes:document.getElementById('edit-notes').value.trim(),
+    status:document.getElementById('edit-status').value,
+  };
+  if(!updates.name||!updates.date){document.getElementById('edit-err').textContent='❌ Name and date are required.';return;}
+  if(db&&docId){try{await updateDoc(doc(db,'bookings',docId),updates);}catch(e){console.error(e);document.getElementById('edit-err').textContent='❌ Failed to save. Try again.';return;}}
+  const idx=allBookings.findIndex(b=>b.ref===ref);
+  if(idx>-1)allBookings[idx]={...allBookings[idx],...updates};
+  closeEditModal(); renderTable(document.querySelector('.search')?.value||'');
+};
+window.deleteBooking=async function(){
+  const ref=document.getElementById('edit-ref').value;
+  const docId=document.getElementById('edit-docid').value;
+  if(!confirm(`⚠️ Delete booking ${ref}? This cannot be undone.`))return;
+  if(db&&docId){try{await deleteDoc(doc(db,'bookings',docId));}catch(e){console.error(e);alert('❌ Failed to delete.');return;}}
+  allBookings=allBookings.filter(b=>b.ref!==ref);
+  closeEditModal(); renderTable(document.querySelector('.search')?.value||'');
+};
+document.getElementById('editOverlay').addEventListener('click',function(e){if(e.target===this)closeEditModal();});
+
+// ── WHATSAPP ───────────────────────────────────────────────────────────────
+function waLink(p,m){return`https://wa.me/${p}?text=${encodeURIComponent(m)}`;}
+function buildFeeMsg(b){
+  const d=new Date(b.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return`🚌 *${BIZ_NAME} — Trip Fee*\n\n📋 *Reference:* ${b.ref}\n📅 *Date:* ${d}\n🗺 *Route:* ${b.from||'?'} → ${b.to||'?'}\n📏 *Distance:* ${b.km} km\n💰 *Total Fee: KSh ${Number(b.total).toLocaleString()}*\n\n_Please confirm and prepare payment before the trip date._\nThank you! 🙏`;
+}
+
+// ── SETTINGS FORM ──────────────────────────────────────────────────────────
+function loadSettingsForm(){
+  document.getElementById('s-phone').value=getSetting('admin_phone','254712000000');
+  document.getElementById('s-bizname').value=getSetting('biz_name','Senator Mugambi Imanyara');
+  document.getElementById('s-ppkm').value=getSetting('def_ppkm','50');
+  document.getElementById('s-driver').value=getSetting('def_driver','1500');
+  const cfg=getSavedConfig()||{};
+  document.getElementById('s-apikey').value=cfg.apiKey||'';
+  document.getElementById('s-projectid').value=cfg.projectId||'';
+  document.getElementById('s-appid').value=cfg.appId||'';
+  document.getElementById('s-senderid').value=cfg.senderId||'';
+  // Message preview
+  document.getElementById('msgPreview').textContent=
+    `🚌 ${BIZ_NAME} — Trip Fee\n\n📋 Reference: BK1234XY\n📅 Date: Monday, 15 June 2026\n🗺 Route: Meru → Nairobi\n📏 Distance: 200 km\n💰 Total Fee: KSh 11,500\n\nPlease confirm and prepare payment before the trip date.\nThank you! 🙏`;
+}
+
+window.saveSettingPhone=async function(){
+  const p=document.getElementById('s-phone').value.trim();
+  if(!p||p.length<9){showOk('s-phone-ok','❌ Enter a valid number.',true);return;}
+  ADMIN_PHONE=p; saveSetting('admin_phone',p);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{adminPhone:p},{merge:true});}catch(e){console.error(e);}}
+  showOk('s-phone-ok','✅ Saved!');
+  renderTable(document.querySelector('.search')?.value||'');
+};
+
+window.saveSettingBizName=async function(){
+  const v=document.getElementById('s-bizname').value.trim();
+  if(!v){showOk('s-bizname-ok','❌ Enter a name.',true);return;}
+  BIZ_NAME=v; saveSetting('biz_name',v);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{bizName:v},{merge:true});}catch(e){console.error(e);}}
+  showOk('s-bizname-ok','✅ Saved!');
+  loadSettingsForm();
+};
+
+window.saveSettingRates=async function(){
+  const ppkm=parseFloat(document.getElementById('s-ppkm').value)||50;
+  const driver=parseFloat(document.getElementById('s-driver').value)||1500;
+  DEF_PPKM=ppkm; DEF_DRIVER=driver;
+  saveSetting('def_ppkm',ppkm); saveSetting('def_driver',driver);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{defPpkm:ppkm,defDriver:driver},{merge:true});}catch(e){console.error(e);}}
+  showOk('s-rates-ok','✅ Saved! New bookings will use these defaults.');
+};
+
+window.saveSettingPass=function(){
+  const cur=document.getElementById('s-curpass').value;
+  const nw=document.getElementById('s-newpass').value.trim();
+  const cn=document.getElementById('s-conpass').value;
+  const err=document.getElementById('s-pass-err');
+  if(cur!==getAdminPass()){err.textContent='❌ Current password is wrong.';return;}
+  if(nw.length<6){err.textContent='❌ Must be at least 6 characters.';return;}
+  if(nw!==cn){err.textContent='❌ Passwords do not match.';return;}
+  localStorage.setItem('tripbook_admin_pass',nw);
+  err.style.color='#81c784'; err.textContent='✅ Password changed successfully!';
+  ['s-curpass','s-newpass','s-conpass'].forEach(id=>document.getElementById(id).value='');
+};
+
+window.saveSettingFirebase=function(){
+  const cfg={
+    apiKey:document.getElementById('s-apikey').value.trim(),
+    projectId:document.getElementById('s-projectid').value.trim(),
+    appId:document.getElementById('s-appid').value.trim(),
+    senderId:document.getElementById('s-senderid').value.trim()
+  };
+  if(!cfg.apiKey||!cfg.projectId){showOk('s-firebase-ok','❌ API Key and Project ID required.',true);return;}
+  localStorage.setItem('tripbook_firebase_config',JSON.stringify(cfg));
+  showOk('s-firebase-ok','✅ Saved! Reconnecting...');
+  setTimeout(()=>{if(unsubscribe)unsubscribe();initFirebase(buildConfig(cfg));},1000);
+};
+
+window.clearLocalData=function(){
+  if(!confirm('⚠️ Clear all local booking data? Firebase data is NOT affected.'))return;
+  localStorage.removeItem('tripbook_private_v3');
+  localStorage.removeItem('tripbook_shared_v3');
+  alert('✅ Local data cleared.');
+};
+
+window.disconnectFirebase=function(){
+  if(!confirm('⚠️ Disconnect Firebase? You will need to re-enter config on next login.'))return;
+  localStorage.removeItem('tripbook_firebase_config');
+  if(unsubscribe)unsubscribe();
+  alert('✅ Firebase disconnected. Reload the page to reconnect.');
+};
+
+function showOk(id,msg,isErr=false){
+  const el=document.getElementById(id);
+  el.style.color=isErr?'#e74c3c':'#81c784';
+  el.textContent=msg;
+  if(!isErr)setTimeout(()=>el.textContent='',3000);
+}
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+window.exportExcel=function(){
+  const rows=[['Ref','Date','Day','Name','WhatsApp','From','To','Notes','KM','Price/KM','Driver Fee','Total Fee','Double-Book','Status']];
+  [...allBookings].sort((a,b)=>a.date>b.date?1:-1).forEach(b=>{
+    rows.push([b.ref,b.date,b.day,b.name,'+'+b.phone,b.from,b.to,b.notes,b.km,b.ppkm,b.driver,b.total,b.isDouble?'YES':'NO',b.status||'']);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:10},{wch:12},{wch:10},{wch:18},{wch:16},{wch:20},{wch:20},{wch:25},{wch:7},{wch:10},{wch:12},{wch:12},{wch:10},{wch:12}];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,'Bookings',ws);
+  XLSX.writeFile(wb,'TripBookings_'+new Date().toISOString().split('T')[0]+'.xlsx');
+};
+</script>
+</body>
+</html>
