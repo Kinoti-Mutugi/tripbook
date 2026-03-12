@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TripBook — Reserve Your Bus</title>
+<style>
+:root{--brown:#6b3a2a;--gold:#c8972a;--cream:#fdf6ee;--white:#fff;--border:#e8ddd0;--muted:#9e8a78;--red:#c0392b;--amber:#d4830a;--wa:#25D366;--wa-dark:#128C7E;--green:#2e7d32;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--cream);color:#3a2a1a;min-height:100vh}
+header{background:var(--brown);padding:1rem 1.5rem;display:flex;align-items:center}
+.logo{font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-0.5px;cursor:pointer;user-select:none}.logo span{color:var(--gold)}
+main{max-width:540px;margin:0 auto;padding:1.2rem 1rem 4rem}
+.steps{display:flex;align-items:center;justify-content:center;margin-bottom:1.5rem;padding-top:0.5rem}
+.step{display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;color:var(--muted)}.step.active{color:var(--brown);font-weight:700}.step.done{color:var(--green)}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--border);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700}
+.step.active .step-num{background:var(--brown);color:#fff}.step.done .step-num{background:var(--green);color:#fff}
+.step-line{height:2px;width:2rem;background:var(--border);margin:0 0.2rem}.step-line.done{background:var(--green)}
+.card{background:var(--white);border-radius:12px;padding:1.4rem;box-shadow:0 2px 12px rgba(0,0,0,0.07);margin-bottom:1rem}
+.card-title{font-size:1.15rem;font-weight:700;color:var(--brown);margin-bottom:0.3rem}
+.card-sub{font-size:0.83rem;color:var(--muted);margin-bottom:1.2rem}
+.mini-calendar{background:var(--cream);border-radius:8px;padding:0.8rem;border:1px solid var(--border)}
+.cal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem}
+.cal-header h3{font-size:0.95rem;color:var(--brown);font-weight:700}
+.cal-nav{background:none;border:1px solid var(--border);border-radius:6px;width:28px;height:28px;cursor:pointer;font-size:1rem;color:var(--brown)}
+.cal-nav:hover{background:var(--border)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;width:100%}
+.cal-day-name{text-align:center;font-size:0.65rem;color:var(--muted);font-weight:600;padding:0.25rem 0;text-transform:uppercase}
+.cal-day{text-align:center;padding:0.35rem 0.15rem;border-radius:5px;font-size:0.8rem;cursor:pointer;transition:all 0.15s}
+.cal-day.empty{background:transparent;cursor:default;pointer-events:none}
+.cal-day.free{background:#f0f9f0;color:#2e7d32}.cal-day.free:hover{background:#c8e6c9}
+.cal-day.busy{background:#fff3e0;color:var(--amber);font-weight:600}
+.cal-day.heavy{background:#fde8e7;color:var(--red);font-weight:700}
+.cal-day.today{outline:2px solid var(--gold);outline-offset:-2px}
+.cal-legend{display:flex;gap:0.8rem;flex-wrap:wrap;margin-top:0.6rem;font-size:0.72rem}
+.leg{display:flex;align-items:center;gap:0.3rem}.leg-dot{width:10px;height:10px;border-radius:3px}
+.date-row{margin-top:1rem}
+.date-row input{width:100%;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;background:var(--cream);color:#3a2a1a}
+.avail-badge{display:none;padding:0.55rem 1rem;border-radius:8px;font-size:0.88rem;font-weight:600;margin-top:0.8rem}
+.avail-badge.free{display:block;background:#e8f5e9;color:var(--green);border:1px solid #a5d6a7}
+.avail-badge.busy{display:block;background:#fff8e1;color:var(--amber);border:1px solid #ffe082}
+.avail-badge.heavy{display:block;background:#fde8e7;color:var(--red);border:1px solid #ef9a9a}
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.65rem 1.2rem;border-radius:8px;font-size:0.9rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+.btn:disabled{opacity:0.45;cursor:not-allowed}
+.btn-primary{background:var(--brown);color:#fff}.btn-primary:not(:disabled):hover{background:#4e2a1a}
+.btn-wa{background:var(--wa);color:#fff;width:100%;justify-content:center;margin-top:0.5rem}.btn-wa:hover{background:var(--wa-dark)}
+.btn-wa-admin{background:var(--wa-dark);color:#fff;width:100%;justify-content:center;margin-top:0.5rem}.btn-wa-admin:hover{background:#075E54}
+.btn-ghost{background:transparent;color:var(--brown);border:1px solid var(--border)}.btn-ghost:hover{border-color:var(--brown)}
+.wa-sent-badge{display:none;background:#e8f5e9;color:var(--green);padding:0.4rem 0.8rem;border-radius:6px;font-size:0.82rem;font-weight:600;margin-top:0.4rem;text-align:center}
+.wa-sent-badge.show{display:block}
+.field-group{margin-bottom:1rem}.field-group label{display:block;font-size:0.82rem;font-weight:600;color:var(--brown);margin-bottom:0.35rem}
+.field-group input,.field-group textarea{width:100%;padding:0.6rem 0.8rem;border:1px solid var(--border);border-radius:8px;font-size:0.9rem;background:var(--cream);color:#3a2a1a;font-family:inherit}
+.field-group textarea{resize:vertical;min-height:70px}
+.confirm-row{display:flex;justify-content:space-between;align-items:center;padding:0.55rem 0;border-bottom:1px solid var(--border);font-size:0.88rem}
+.confirm-row:last-child{border-bottom:none}.confirm-row span:first-child{color:var(--muted);font-size:0.82rem}
+.ref-box{background:var(--cream);border:2px dashed var(--gold);border-radius:10px;text-align:center;padding:1rem;margin-bottom:1.2rem}
+.ref-box h2{font-size:1.05rem;color:var(--muted);margin-bottom:0.3rem}
+.ref-code{font-size:1.8rem;font-weight:800;color:var(--brown);letter-spacing:2px}
+.spinner{display:none;text-align:center;padding:0.6rem;color:var(--muted);font-size:0.85rem}.spinner.show{display:block}
+.fb-banner{background:#fff3e0;border:1px solid #ffe082;border-radius:8px;padding:0.7rem 1rem;font-size:0.8rem;color:#7c4a00;margin-bottom:1rem;display:none}.fb-banner.show{display:block}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" id="logoTap">Trip<span>Book</span></div>
+</header>
+<main>
+  <div class="fb-banner" id="fbBanner">⚠️ <strong>Firebase not connected yet.</strong> Bookings save locally only. Open admin.html to add your Firebase config.</div>
+  <div class="steps">
+    <div class="step active" id="step1"><div class="step-num">1</div><span>Check Date</span></div>
+    <div class="step-line" id="line1"></div>
+    <div class="step" id="step2"><div class="step-num">2</div><span>Your Details</span></div>
+    <div class="step-line" id="line2"></div>
+    <div class="step" id="step3"><div class="step-num">3</div><span>Confirmed</span></div>
+  </div>
+  <!-- STEP 1 -->
+  <div id="panel1" class="card">
+    <div class="card-title">When do you need the bus?</div>
+    <div class="card-sub">Pick a date to check availability instantly. Your details stay private.</div>
+    <div class="mini-calendar">
+      <div class="cal-header">
+        <button class="cal-nav" onclick="changeMonth(-1)">&#8249;</button>
+        <h3 id="calMonthLabel"></h3>
+        <button class="cal-nav" onclick="changeMonth(1)">&#8250;</button>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <div class="leg"><div class="leg-dot" style="background:#e8f5e9"></div>Available</div>
+        <div class="leg"><div class="leg-dot" style="background:#fff3e0"></div>Has booking</div>
+        <div class="leg"><div class="leg-dot" style="background:#fde8e7"></div>Very busy</div>
+      </div>
+    </div>
+    <div class="date-row"><input type="date" id="checkDate" onchange="checkAvailability()"/></div>
+    <div class="avail-badge" id="availBadge"></div>
+    <div style="margin-top:1rem">
+      <button class="btn btn-primary" id="proceedBtn" onclick="goToForm()" disabled>Continue to Book &#8594;</button>
+    </div>
+  </div>
+  <!-- STEP 2 -->
+  <div id="panel2" class="card" style="display:none">
+    <div class="card-title">Your Details</div>
+    <div class="card-sub" id="formDateLabel"></div>
+    <div class="field-group"><label>Full Name *</label><input type="text" id="f-name" placeholder="e.g. John Mwenda"/></div>
+    <div class="field-group"><label>Your WhatsApp Number *</label><input type="tel" id="f-phone" placeholder="e.g. 0712 345 678"/></div>
+    <div class="field-group"><label>From (pick-up location)</label><input type="text" id="f-from" placeholder="e.g. Meru Town"/></div>
+    <div class="field-group"><label>To (destination)</label><input type="text" id="f-to" placeholder="e.g. Nairobi"/></div>
+    <div class="field-group"><label>Trip Purpose / Notes</label><textarea id="f-notes" placeholder="e.g. School trip, Burial, Church..."></textarea></div>
+    <div class="spinner" id="submitSpinner">⏳ Saving your booking...</div>
+    <div style="display:flex;gap:0.7rem;margin-top:0.5rem">
+      <button class="btn btn-ghost" onclick="goBack()">&#8592; Back</button>
+      <button class="btn btn-primary" id="submitBtn" style="flex:1;justify-content:center" onclick="submitBooking()">Confirm Booking &#10003;</button>
+    </div>
+  </div>
+  <!-- STEP 3 -->
+  <div id="panel3" class="card" style="display:none">
+    <div class="card-title" style="color:var(--green)">&#10003; Booking Received!</div>
+    <div class="card-sub">Save your reference number. The admin will send your fee via WhatsApp.</div>
+    <div class="ref-box"><h2>Your Reference</h2><div class="ref-code" id="confirmRef"></div></div>
+    <div id="confirmDetails"></div>
+    <div style="margin-top:1.2rem">
+      <button class="btn btn-wa" onclick="sendWASelf()">&#128172; Send Confirmation to My WhatsApp</button>
+      <div class="wa-sent-badge" id="waSelfSent">&#10003; Sent to your WhatsApp</div>
+      <button class="btn btn-wa-admin" onclick="sendWAAdmin()" style="margin-top:0.5rem">&#128276; Notify Admin via WhatsApp</button>
+      <div class="wa-sent-badge" id="waAdminSent">&#10003; Admin notified</div>
+    </div>
+    <button class="btn btn-ghost" style="margin-top:1rem;width:100%;justify-content:center" onclick="resetAll()">Make Another Booking</button>
+  </div>
+</main>
+
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getFirestore,collection,addDoc,onSnapshot,doc,setDoc,getDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ╔══════════════════════════════════════════════════════════════╗
+// ║   STEP 1: PASTE YOUR FIREBASE CONFIG HERE                   ║
+// ║   Get it from Firebase Console → Project Settings           ║
+// ╚══════════════════════════════════════════════════════════════╝
+const firebaseConfig={
+  apiKey:"AIzaSyCmELbqlcuI23IVSb1ht67nBUwnsfecZYw",
+  authDomain:"tripbook-9d180.firebaseapp.com",
+  projectId:"tripbook-9d180",
+  storageBucket:"tripbook-9d180.firebasestorage.app",
+  messagingSenderId:"845066490010",
+  appId:"1:845066490010:web:e49ec4c5effa6282094f23"
+};
+// ════════════════════════════════════════════════════════════════
+
+const CONFIGURED = firebaseConfig.apiKey !== "YOUR_API_KEY";
+let ADMIN_PHONE = localStorage.getItem('tripbook_admin_phone')||'254712000000';
+let db=null, dateCounts={}, calYear=new Date().getFullYear(), calMonth=new Date().getMonth();
+let selectedDate='', dateIsBusy=false, currentBooking=null;
+
+// Local fallback storage
+const PK='tripbook_private_v3', SK='tripbook_shared_v3';
+function localGet(k,def){try{return JSON.parse(localStorage.getItem(k)||def)}catch{return JSON.parse(def)}}
+function saveLocal(b){
+  const all=localGet(PK,'[]'); all.push(b); localStorage.setItem(PK,JSON.stringify(all));
+  const sh={}; all.forEach(x=>{sh[x.date]=(sh[x.date]||0)+1;}); localStorage.setItem(SK,JSON.stringify(sh));
+}
+
+function setCalToFirstBooking(counts){
+  const dates=Object.keys(counts).filter(d=>counts[d]>0).sort();
+  if(dates.length){const d=new Date(dates[0]+'T00:00:00');calYear=d.getFullYear();calMonth=d.getMonth();}
+}
+
+if(CONFIGURED){
+  try{
+    const app=initializeApp(firebaseConfig); db=getFirestore(app);
+    // Real-time availability listener
+    onSnapshot(doc(db,'meta','availability'),snap=>{
+      if(snap.exists()){dateCounts=snap.data();setCalToFirstBooking(dateCounts);renderCalendar();}
+    });
+    // Load admin phone
+    getDoc(doc(db,'meta','settings')).then(s=>{
+      if(s.exists()&&s.data().adminPhone){ADMIN_PHONE=s.data().adminPhone;localStorage.setItem('tripbook_admin_phone',ADMIN_PHONE);}
+    });
+  }catch(e){console.error(e);fallback();}
+}else{document.getElementById('fbBanner').classList.add('show');fallback();}
+
+function fallback(){dateCounts=localGet(SK,'{}');setCalToFirstBooking(dateCounts);renderCalendar();}
+
+// ── CALENDAR ────────────────────────────────────────────────────────
+function renderCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const dn=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  document.getElementById('calMonthLabel').textContent=months[calMonth]+' '+calYear;
+  const grid=document.getElementById('calGrid');
+  let h=dn.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const first=new Date(calYear,calMonth,1).getDay(), days=new Date(calYear,calMonth+1,0).getDate();
+  const today=new Date().toISOString().split('T')[0];
+  for(let i=0;i<first;i++) h+=`<div class="cal-day empty"></div>`;
+  for(let d=1;d<=days;d++){
+    const ds=`${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const cnt=dateCounts[ds]||0, cls=cnt>=3?'heavy':cnt>0?'busy':'free', tod=ds===today?' today':'';
+    h+=`<div class="cal-day ${cls}${tod}" title="${cnt?cnt+' booking(s)':''}" onclick="pickDate('${ds}')">${d}</div>`;
+  }
+  const rem=(first+days)%7; if(rem) for(let i=0;i<7-rem;i++) h+=`<div class="cal-day empty"></div>`;
+  grid.innerHTML=h;
+}
+window.renderCalendar=renderCalendar;
+window.changeMonth=d=>{calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();};
+window.pickDate=ds=>{document.getElementById('checkDate').value=ds;checkAvailability();};
+renderCalendar();
+
+// ── AVAILABILITY ─────────────────────────────────────────────────
+window.checkAvailability=function(){
+  const ds=document.getElementById('checkDate').value; if(!ds) return;
+  selectedDate=ds; const cnt=dateCounts[ds]||0, badge=document.getElementById('availBadge');
+  if(cnt===0){badge.className='avail-badge free';badge.textContent='✅ Great! This date is available.';dateIsBusy=false;}
+  else if(cnt<3){badge.className='avail-badge busy';badge.textContent='⚠ There is already a booking on this date. You can still proceed.';dateIsBusy=true;}
+  else{badge.className='avail-badge heavy';badge.textContent='🚫 This date is very busy. Consider another date.';dateIsBusy=true;}
+  document.getElementById('proceedBtn').disabled=false;
+  const d=new Date(ds+'T00:00:00');calYear=d.getFullYear();calMonth=d.getMonth();renderCalendar();
+};
+
+// ── NAVIGATION ───────────────────────────────────────────────────
+function show(n){[1,2,3].forEach(i=>document.getElementById('panel'+i).style.display=i===n?'block':'none');}
+window.goToForm=function(){
+  if(!selectedDate){alert('Please select a date first.');return;}
+  show(2);
+  document.getElementById('step1').className='step done';document.getElementById('line1').className='step-line done';
+  document.getElementById('step2').className='step active';
+  document.getElementById('formDateLabel').textContent='Booking for: '+new Date(selectedDate+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  scrollTo({top:0,behavior:'smooth'});
+};
+window.goBack=function(){
+  show(1);document.getElementById('step1').className='step active';
+  document.getElementById('step2').className='step';document.getElementById('line1').className='step-line';
+};
+
+// ── SUBMIT ───────────────────────────────────────────────────────
+function uid(){return'BK'+Date.now().toString(36).toUpperCase().slice(-4)+Math.random().toString(36).slice(2,5).toUpperCase();}
+window.submitBooking=async function(){
+  const name=document.getElementById('f-name').value.trim();
+  const phone=document.getElementById('f-phone').value.trim().replace(/\s/g,'');
+  const from=document.getElementById('f-from').value.trim();
+  const to=document.getElementById('f-to').value.trim();
+  if(!name){alert('Please enter your name.');return;}
+  if(!phone){alert('Please enter your WhatsApp number.');return;}
+  if(!from&&!to){alert('Please enter at least a From or To location.');return;}
+  const d=new Date(selectedDate+'T00:00:00');
+  let fp=phone.replace(/^0/,''); if(!fp.startsWith('254')) fp='254'+fp;
+  currentBooking={ref:uid(),date:selectedDate,day:['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()],
+    name,phone:fp,from,to,km:null,ppkm:null,driver:null,total:null,
+    notes:document.getElementById('f-notes').value.trim(),isDouble:dateIsBusy,feeSet:false,status:'',createdAt:new Date().toISOString()};
+  document.getElementById('submitSpinner').classList.add('show');
+  document.getElementById('submitBtn').disabled=true;
+  try{
+    if(db){
+      await addDoc(collection(db,'bookings'),currentBooking);
+      await setDoc(doc(db,'meta','availability'),{...dateCounts,[selectedDate]:(dateCounts[selectedDate]||0)+1},{merge:true});
+    }else{saveLocal(currentBooking);dateCounts[selectedDate]=(dateCounts[selectedDate]||0)+1;}
+  }catch(e){console.error(e);saveLocal(currentBooking);alert('⚠ Server unreachable. Booking saved locally. Please also notify admin via WhatsApp.');}
+  document.getElementById('submitSpinner').classList.remove('show');
+  document.getElementById('submitBtn').disabled=false;
+  // Show confirmation
+  show(3);
+  document.getElementById('step2').className='step done';document.getElementById('step3').className='step active';
+  document.getElementById('line2').className='step-line done';
+  document.getElementById('confirmRef').textContent=currentBooking.ref;
+  const dl=d.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('confirmDetails').innerHTML=`
+    <div class="confirm-row"><span>Date</span><span>${dl}</span></div>
+    <div class="confirm-row"><span>Route</span><span>${from||'?'} → ${to||'?'}</span></div>
+    <div class="confirm-row"><span>Name</span><span>${name}</span></div>
+    <div class="confirm-row"><span>WhatsApp</span><span>+${fp}</span></div>
+    <div class="confirm-row"><span>Fee</span><span style="color:var(--muted);font-size:0.85rem">⏳ Admin will contact you with the fee</span></div>
+    ${currentBooking.isDouble?'<div class="confirm-row"><span>Note</span><span style="color:var(--amber)">⚠ Another booking exists on this date</span></div>':''}`;
+  document.getElementById('waSelfSent').classList.remove('show');
+  document.getElementById('waAdminSent').classList.remove('show');
+  renderCalendar(); scrollTo({top:0,behavior:'smooth'});
+};
+
+// ── WHATSAPP ─────────────────────────────────────────────────────
+const waLink=(p,m)=>`https://wa.me/${p}?text=${encodeURIComponent(m)}`;
+window.sendWASelf=function(){if(!currentBooking)return;
+  const d=new Date(currentBooking.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const msg=`🚌 *TripBook — Booking Received!*\n\n📋 *Reference:* ${currentBooking.ref}\n📅 *Date:* ${d}\n🗺 *Route:* ${currentBooking.from||'?'} → ${currentBooking.to||'?'}\n${currentBooking.notes?`📝 *Purpose:* ${currentBooking.notes}\n`:''}\n💰 *Fee:* Admin will contact you shortly.\n\n_Save this reference for any inquiries._\nThank you! 🙏`;
+  window.open(waLink(currentBooking.phone,msg),'_blank');document.getElementById('waSelfSent').classList.add('show');};
+window.sendWAAdmin=function(){if(!currentBooking)return;
+  const d=new Date(currentBooking.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const msg=`🔔 *New Booking — TripBook*\n\n📋 *Ref:* ${currentBooking.ref}\n👤 *Name:* ${currentBooking.name}\n📱 *Phone:* +${currentBooking.phone}\n📅 *Date:* ${d} (${currentBooking.day})\n🗺 *Route:* ${currentBooking.from||'?'} → ${currentBooking.to||'?'}\n📝 *Notes:* ${currentBooking.notes||'—'}\n${currentBooking.isDouble?'\n⚠ *DOUBLE-BOOKING* on this date.':'✅ Date was free.'}`;
+  window.open(waLink(ADMIN_PHONE,msg),'_blank');document.getElementById('waAdminSent').classList.add('show');};
+
+// ── RESET ────────────────────────────────────────────────────────
+window.resetAll=function(){
+  show(1);['step1','step2','step3'].forEach(id=>{document.getElementById(id).className='step';});
+  document.getElementById('step1').className='step active';
+  ['line1','line2'].forEach(id=>document.getElementById(id).className='step-line');
+  document.getElementById('checkDate').value='';document.getElementById('availBadge').className='avail-badge';
+  document.getElementById('proceedBtn').disabled=true;selectedDate='';dateIsBusy=false;currentBooking=null;
+  ['f-name','f-phone','f-from','f-to','f-notes'].forEach(id=>document.getElementById(id).value='');
+  scrollTo({top:0,behavior:'smooth'});
+};
+
+// ── SECRET ADMIN ACCESS ──────────────────────────────────────────
+(function(){let t=0,tm=null;
+  document.getElementById('logoTap').addEventListener('click',function(){
+    t++;clearTimeout(tm);if(t>=5){t=0;window.open('admin.html','_blank');return;}
+    this.style.opacity='0.6';setTimeout(()=>this.style.opacity='',150);tm=setTimeout(()=>t=0,3000);
+  });
+})();
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key==='A'){e.preventDefault();window.open('admin.html','_blank');}});
+</script>
+</body>
+</html>

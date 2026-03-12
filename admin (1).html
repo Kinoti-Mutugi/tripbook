@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TripBook Admin</title>
+<style>
+:root{--brown:#6b3a2a;--gold:#c8972a;--cream:#fdf6ee;--border:#e8ddd0;--muted:#9e8a78;--red:#c0392b;--amber:#d4830a;--wa:#25D366;--wa-dark:#128C7E;--green:#2e7d32;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1610;color:#f0e8dc;min-height:100vh}
+header{background:#111;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold)}
+.logo{font-size:1.3rem;font-weight:800;color:#fff}.logo span{color:var(--gold)}
+.badge{background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:4px;margin-left:0.5rem;letter-spacing:1px}
+.back-btn{color:var(--muted);font-size:0.8rem;text-decoration:none;cursor:pointer}.back-btn:hover{color:var(--gold)}
+/* LOGIN */
+.login-wrap{max-width:360px;margin:5rem auto;padding:1.5rem;background:#26211a;border-radius:14px;border:1px solid #3a3028;box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+.login-wrap h2{color:var(--gold);margin-bottom:0.3rem}
+.login-wrap p{color:var(--muted);font-size:0.82rem;margin-bottom:1.5rem}
+.ifield{width:100%;padding:0.65rem 0.9rem;border:1px solid #3a3028;border-radius:8px;font-size:0.9rem;background:#1a1610;color:#f0e8dc;margin-bottom:0.8rem;font-family:inherit}
+.ifield:focus{outline:none;border-color:var(--gold)}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+.btn-gold{background:var(--gold);color:#fff;width:100%;justify-content:center}.btn-gold:hover{background:#a87820}
+.btn-sm{padding:0.32rem 0.75rem;font-size:0.76rem}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid #3a3028}.btn-ghost:hover{border-color:var(--gold)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#96281b}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#1b5e20}
+.err{color:#e74c3c;font-size:0.8rem;margin-top:0.3rem;min-height:1em}
+/* CONFIG PANEL */
+.config-panel{max-width:640px;margin:2rem auto;padding:1.5rem;background:#26211a;border-radius:14px;border:1px solid var(--gold);display:none}
+.config-panel h3{color:var(--gold);margin-bottom:0.5rem}
+.config-panel p{color:var(--muted);font-size:0.82rem;margin-bottom:1.2rem;line-height:1.6}
+.config-panel label{display:block;font-size:0.78rem;color:var(--gold);margin-bottom:0.3rem;margin-top:0.8rem;font-weight:600}
+.save-note{background:#1a3a1a;border:1px solid #2e7d32;border-radius:8px;padding:0.8rem;font-size:0.8rem;color:#81c784;margin-top:1rem;line-height:1.6}
+/* DASHBOARD */
+#dashboard{display:none;padding:1rem 1rem 4rem;max-width:1300px;margin:0 auto}
+.dash-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.7rem;margin-bottom:1rem}
+.dash-top h2{color:var(--gold);font-size:1.1rem}
+.actions{display:flex;gap:0.5rem;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1rem}
+.stat{background:#26211a;border-radius:10px;padding:0.8rem 1rem;border:1px solid #3a3028}
+.stat strong{display:block;font-size:1.35rem;color:var(--gold)}.stat span{font-size:0.76rem;color:var(--muted)}
+.stat.warn strong{color:var(--red)}.stat.pend strong{color:var(--amber)}.stat.ok strong{color:#81c784}
+.search{background:#26211a;border:1px solid #3a3028;border-radius:8px;padding:0.5rem 0.8rem;color:#f0e8dc;font-size:0.88rem;width:100%;max-width:300px;font-family:inherit}
+.search:focus{outline:none;border-color:var(--gold)}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #3a3028}
+table{width:100%;border-collapse:collapse;font-size:0.8rem;background:#1e1a14}
+thead th{background:#2e2820;color:var(--gold);padding:0.6rem 0.5rem;text-align:left;white-space:nowrap;font-weight:700;border-bottom:1px solid #3a3028}
+tbody td{padding:0.5rem 0.5rem;border-bottom:1px solid #2e2820;vertical-align:middle;color:#d4c4b0}
+tbody tr:hover td{background:#26211a}
+.sbadge{padding:0.18rem 0.5rem;border-radius:4px;font-size:0.68rem;font-weight:700}
+.s-ok{background:#1a3a1a;color:#81c784}.s-dbl{background:#3a1a1a;color:#ef9a9a}
+.wa-btn{display:inline-block;background:var(--wa-dark);color:#fff;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.7rem;text-decoration:none;white-space:nowrap}.wa-btn:hover{background:#075E54}
+.fi{width:62px;padding:0.22rem 0.35rem;border:1px solid #3a3028;border-radius:4px;font-size:0.76rem;background:#1a1610;color:#f0e8dc}
+.set-btn{background:var(--gold);color:#fff;border:none;padding:0.26rem 0.55rem;border-radius:4px;font-size:0.7rem;cursor:pointer;font-weight:700;white-space:nowrap}.set-btn:hover{background:#a87820}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}.overlay.open{display:flex}
+.modal{background:#26211a;border-radius:12px;padding:1.4rem;max-width:380px;width:100%;border:1px solid #3a3028}
+.modal h3{color:var(--gold);margin-bottom:1rem}
+/* SYNC STATUS */
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:0.4rem}
+.sync-dot.live{background:#25D366;animation:pulse 2s infinite}
+.sync-dot.local{background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Trip<span>Book</span><span class="badge">ADMIN</span></div>
+  <a class="back-btn" href="booking.html">&#8592; Booking Page</a>
+</header>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <h2>&#128274; Admin Login</h2>
+    <p>This area is restricted to authorised personnel only.</p>
+    <input class="ifield" type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-gold" onclick="doLogin()">Login &#8594;</button>
+  </div>
+</div>
+
+<!-- FIREBASE CONFIG PANEL (shown first time or if not configured) -->
+<div class="config-panel" id="configPanel">
+  <h3>&#9881; Connect Firebase</h3>
+  <p>Paste your Firebase config below. You only need to do this once.<br/>
+  Get it from: <strong>Firebase Console → Your Project → Project Settings → Your Apps → SDK setup</strong></p>
+  <label>API Key</label><input class="ifield" id="cfg-apiKey" placeholder="AIzaSy..."/>
+  <label>Project ID</label><input class="ifield" id="cfg-projectId" placeholder="your-project-id"/>
+  <label>App ID</label><input class="ifield" id="cfg-appId" placeholder="1:123456789:web:abc..."/>
+  <label>Messaging Sender ID</label><input class="ifield" id="cfg-senderId" placeholder="123456789"/>
+  <div class="save-note">
+    ✅ After saving, bookings from ALL devices will sync here in real-time.<br/>
+    ✅ The booking page will also update automatically when you save.
+  </div>
+  <div style="display:flex;gap:0.6rem;margin-top:1rem">
+    <button class="btn btn-ghost" onclick="skipConfig()">Skip for now</button>
+    <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="saveConfig()">Save &amp; Connect &#10003;</button>
+  </div>
+  <div class="err" id="cfgErr"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <div class="dash-top">
+    <div style="display:flex;align-items:center;gap:0.5rem">
+      <h2>Dashboard</h2>
+      <span id="syncStatus" style="font-size:0.75rem;color:var(--muted)"></span>
+    </div>
+    <div class="actions">
+      <input class="search" type="text" placeholder="&#128269; Search..." oninput="renderTable(this.value)"/>
+      <button class="btn btn-ghost btn-sm" onclick="openPhoneModal()">&#9999; Phone</button>
+      <button class="btn btn-ghost btn-sm" onclick="openPassModal()">&#128273; Password</button>
+      <button class="btn btn-ghost btn-sm" onclick="exportExcel()">&#128229; Export</button>
+      <button class="btn btn-red btn-sm" onclick="doLogout()">Logout</button>
+    </div>
+  </div>
+  <div class="stats" id="statsGrid"></div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th>#</th><th>Ref</th><th>Date</th><th>Day</th><th>Name</th>
+        <th>WhatsApp</th><th>Route</th><th>Notes</th><th>KM</th>
+        <th>Fee</th><th>Action</th><th>Status</th>
+      </tr></thead>
+      <tbody id="tBody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="overlay" id="passOverlay">
+  <div class="modal">
+    <h3>&#128273; Change Password</h3>
+    <input class="ifield" type="password" id="curPass" placeholder="Current password"/>
+    <input class="ifield" type="password" id="newPass" placeholder="New password (min 6 chars)"/>
+    <input class="ifield" type="password" id="conPass" placeholder="Confirm new password"/>
+    <div class="err" id="passErr"></div>
+    <div style="display:flex;gap:0.6rem;margin-top:0.5rem">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closePassModal()">Cancel</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="savePass()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PHONE MODAL -->
+<div class="overlay" id="phoneOverlay">
+  <div class="modal">
+    <h3>&#9999; Admin WhatsApp Number</h3>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1rem">Enter your number with country code, no + or spaces.<br/>Example: <strong>254712345678</strong></p>
+    <input class="ifield" type="tel" id="newPhone" placeholder="254712345678"/>
+    <div class="err" id="phoneErr"></div>
+    <div style="display:flex;gap:0.6rem;margin-top:0.5rem">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closePhoneModal()">Cancel</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="savePhone()">Save</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getFirestore,collection,getDocs,onSnapshot,doc,setDoc,updateDoc,query,orderBy}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function getAdminPass(){return localStorage.getItem('tripbook_admin_pass')||'admin123';}
+let ADMIN_PHONE=localStorage.getItem('tripbook_admin_phone')||'254712000000';
+
+// ── LOAD SAVED FIREBASE CONFIG ─────────────────────────────────────────────
+function getSavedConfig(){
+  try{return JSON.parse(localStorage.getItem('tripbook_firebase_config')||'null');}catch{return null;}
+}
+function buildConfig(cfg){
+  return{
+    apiKey:cfg.apiKey,
+    authDomain:`${cfg.projectId}.firebaseapp.com`,
+    projectId:cfg.projectId,
+    storageBucket:`${cfg.projectId}.appspot.com`,
+    messagingSenderId:cfg.senderId,
+    appId:cfg.appId
+  };
+}
+
+let db=null, allBookings=[], unsubscribe=null;
+
+// ── AUTH ───────────────────────────────────────────────────────────────────
+window.doLogin=function(){
+  const pass=document.getElementById('adminPass').value;
+  if(pass!==getAdminPass()){document.getElementById('loginErr').textContent='❌ Incorrect password.';return;}
+  document.getElementById('loginScreen').style.display='none';
+  const saved=getSavedConfig();
+  if(!saved){
+    document.getElementById('configPanel').style.display='block';
+  } else {
+    initFirebase(buildConfig(saved));
+  }
+};
+document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
+
+window.doLogout=function(){
+  if(unsubscribe) unsubscribe();
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('loginScreen').style.display='block';
+  document.getElementById('adminPass').value='';
+  document.getElementById('loginErr').textContent='';
+};
+
+// ── FIREBASE CONFIG ────────────────────────────────────────────────────────
+window.saveConfig=function(){
+  const cfg={
+    apiKey:document.getElementById('cfg-apiKey').value.trim(),
+    projectId:document.getElementById('cfg-projectId').value.trim(),
+    appId:document.getElementById('cfg-appId').value.trim(),
+    senderId:document.getElementById('cfg-senderId').value.trim()
+  };
+  if(!cfg.apiKey||!cfg.projectId){document.getElementById('cfgErr').textContent='❌ API Key and Project ID are required.';return;}
+  localStorage.setItem('tripbook_firebase_config',JSON.stringify(cfg));
+  document.getElementById('configPanel').style.display='none';
+  initFirebase(buildConfig(cfg));
+};
+window.skipConfig=function(){
+  document.getElementById('configPanel').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  loadLocalBookings();
+  setSyncStatus(false);
+};
+
+function initFirebase(config){
+  try{
+    const app=initializeApp(config);
+    db=getFirestore(app);
+    document.getElementById('dashboard').style.display='block';
+    setSyncStatus(true);
+    // Real-time listener on bookings
+    const q=query(collection(db,'bookings'),orderBy('date'));
+    unsubscribe=onSnapshot(q,snap=>{
+      allBookings=snap.docs.map(d=>({id:d.id,...d.data()}));
+      renderTable(document.querySelector('.search')?.value||'');
+    }, err=>{
+      console.error('Firestore error:',err);
+      setSyncStatus(false);
+      loadLocalBookings();
+    });
+    // Load admin phone from Firestore settings
+    import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js').then(({getDoc})=>{
+      getDoc(doc(db,'meta','settings')).then(s=>{
+        if(s.exists()&&s.data().adminPhone){ADMIN_PHONE=s.data().adminPhone;localStorage.setItem('tripbook_admin_phone',ADMIN_PHONE);}
+      });
+    });
+  }catch(e){
+    console.error('Firebase init error:',e);
+    alert('❌ Firebase connection failed. Check your config values.\n\nError: '+e.message);
+    document.getElementById('configPanel').style.display='block';
+  }
+}
+
+function setSyncStatus(live){
+  const el=document.getElementById('syncStatus');
+  el.innerHTML=`<span class="sync-dot ${live?'live':'local'}"></span>${live?'Live — syncing in real-time':'Local only — not connected to Firebase'}`;
+}
+function loadLocalBookings(){
+  try{allBookings=JSON.parse(localStorage.getItem('tripbook_private_v3')||'[]');}catch{allBookings=[];}
+  renderTable('');
+}
+
+// ── TABLE ──────────────────────────────────────────────────────────────────
+window.renderTable=function(search=''){
+  let data=[...allBookings].sort((a,b)=>a.date>b.date?1:-1);
+  if(search){const q=search.toLowerCase();data=data.filter(b=>[b.name,b.from,b.to,b.phone,b.ref,b.notes,b.date].join(' ').toLowerCase().includes(q));}
+  const totalRev=data.reduce((s,b)=>s+(+b.total||0),0);
+  const doubles=data.filter(b=>b.isDouble).length;
+  const pending=data.filter(b=>!b.feeSet).length;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat"><strong>${data.length}</strong><span>Total Bookings</span></div>
+    <div class="stat ok"><strong>KSh ${totalRev.toLocaleString()}</strong><span>Revenue</span></div>
+    <div class="stat warn"><strong>${doubles}</strong><span>Double-Bookings ⚠</span></div>
+    <div class="stat pend"><strong>${pending}</strong><span>Fees Pending ⏳</span></div>
+    <div class="stat"><strong>+${ADMIN_PHONE}</strong><span>Admin WhatsApp</span></div>`;
+  const tbody=document.getElementById('tBody');
+  if(!data.length){tbody.innerHTML=`<tr><td colspan="12" style="text-align:center;padding:2rem;color:var(--muted)">No bookings found</td></tr>`;return;}
+  tbody.innerHTML=data.map((b,i)=>`
+    <tr id="row-${b.ref}">
+      <td style="color:var(--muted)">${i+1}</td>
+      <td style="font-weight:700;color:var(--gold);white-space:nowrap">${b.ref}</td>
+      <td style="white-space:nowrap">${b.date}</td>
+      <td style="white-space:nowrap">${b.day||'—'}</td>
+      <td><strong>${b.name||'—'}</strong></td>
+      <td><a class="wa-btn" href="https://wa.me/${b.phone}" target="_blank">+${b.phone||'—'}</a></td>
+      <td style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis">${b.from||'?'} → ${b.to||'?'}</td>
+      <td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">${b.notes||'—'}</td>
+      <td>${b.feeSet?`<span style="color:var(--gold)">${b.km} km</span>`:`<input class="fi" type="number" placeholder="KM" value="${b.km||''}" id="km-${b.ref}"/>`}</td>
+      <td>${b.feeSet?`<strong style="color:#81c784">KSh ${Number(b.total).toLocaleString()}</strong>`:`
+        <div style="display:flex;flex-direction:column;gap:2px">
+          <input class="fi" type="number" placeholder="KSh/km" value="${b.ppkm||50}" id="ppkm-${b.ref}"/>
+          <input class="fi" type="number" placeholder="Driver" value="${b.driver||1500}" id="drv-${b.ref}"/>
+        </div>`}</td>
+      <td>${b.feeSet
+        ?`<a class="wa-btn" href="${waLink(b.phone,buildFeeMsg(b))}" target="_blank">💬 Resend</a>`
+        :`<button class="set-btn" onclick="saveFee('${b.ref}','${b.id||''}')">✓ Set &amp; Send</button>`}</td>
+      <td><span class="sbadge ${b.isDouble?'s-dbl':'s-ok'}">${b.isDouble?'Double':'OK'}</span></td>
+    </tr>`).join('');
+};
+
+window.saveFee=async function(ref,docId){
+  const km=parseFloat(document.getElementById('km-'+ref)?.value)||0;
+  const ppkm=parseFloat(document.getElementById('ppkm-'+ref)?.value)||50;
+  const drv=parseFloat(document.getElementById('drv-'+ref)?.value)||1500;
+  const total=(km*ppkm)+drv;
+  const updates={km,ppkm,driver:drv,total,feeSet:true};
+  // Update in Firestore
+  if(db&&docId){
+    try{await updateDoc(doc(db,'bookings',docId),updates);}
+    catch(e){console.error('Update error:',e);}
+  }
+  // Also update local copy
+  const idx=allBookings.findIndex(b=>b.ref===ref);
+  if(idx>-1){allBookings[idx]={...allBookings[idx],...updates};}
+  // Send WhatsApp fee message
+  const booking=allBookings.find(b=>b.ref===ref);
+  if(booking) window.open(waLink(booking.phone,buildFeeMsg({...booking,...updates})),'_blank');
+  renderTable(document.querySelector('.search')?.value||'');
+};
+
+// ── WHATSAPP ───────────────────────────────────────────────────────────────
+function waLink(p,m){return`https://wa.me/${p}?text=${encodeURIComponent(m)}`;}
+function buildFeeMsg(b){
+  const d=new Date(b.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return`🚌 *TripBook — Your Trip Fee*\n\n📋 *Reference:* ${b.ref}\n📅 *Date:* ${d}\n🗺 *Route:* ${b.from||'?'} → ${b.to||'?'}\n📏 *Distance:* ${b.km} km\n💰 *Total Fee: KSh ${Number(b.total).toLocaleString()}*\n\n_Please confirm and prepare payment before the trip date._\nThank you! 🙏`;
+}
+
+// ── SETTINGS ──────────────────────────────────────────────────────────────
+window.openPhoneModal=function(){
+  document.getElementById('newPhone').value=ADMIN_PHONE;
+  document.getElementById('phoneErr').textContent='';
+  document.getElementById('phoneOverlay').classList.add('open');
+};
+window.closePhoneModal=()=>document.getElementById('phoneOverlay').classList.remove('open');
+window.savePhone=async function(){
+  const p=document.getElementById('newPhone').value.trim();
+  if(!p||p.length<9){document.getElementById('phoneErr').textContent='❌ Enter a valid number.';return;}
+  ADMIN_PHONE=p; localStorage.setItem('tripbook_admin_phone',p);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{adminPhone:p},{merge:true});}catch(e){console.error(e);}}
+  closePhoneModal(); renderTable(document.querySelector('.search')?.value||'');
+  alert('✅ Admin phone updated to: +'+p);
+};
+
+window.openPassModal=function(){
+  ['curPass','newPass','conPass'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('passErr').textContent='';
+  document.getElementById('passOverlay').classList.add('open');
+};
+window.closePassModal=()=>document.getElementById('passOverlay').classList.remove('open');
+window.savePass=function(){
+  const cur=document.getElementById('curPass').value;
+  const nw=document.getElementById('newPass').value.trim();
+  const cn=document.getElementById('conPass').value;
+  if(cur!==getAdminPass()){document.getElementById('passErr').textContent='❌ Current password is wrong.';return;}
+  if(nw.length<6){document.getElementById('passErr').textContent='❌ Must be at least 6 characters.';return;}
+  if(nw!==cn){document.getElementById('passErr').textContent='❌ Passwords do not match.';return;}
+  localStorage.setItem('tripbook_admin_pass',nw);
+  closePassModal(); alert('✅ Password changed successfully!');
+};
+
+// Close modals on background click
+['passOverlay','phoneOverlay'].forEach(id=>{
+  document.getElementById(id).addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');});
+});
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+window.exportExcel=function(){
+  const rows=[['Ref','Date','Day','Name','WhatsApp','From','To','Notes','KM','Price/KM','Driver Fee','Total Fee','Double-Book','Status']];
+  [...allBookings].sort((a,b)=>a.date>b.date?1:-1).forEach(b=>{
+    rows.push([b.ref,b.date,b.day,b.name,'+'+b.phone,b.from,b.to,b.notes,b.km,b.ppkm,b.driver,b.total,b.isDouble?'YES':'NO',b.status||'']);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:10},{wch:12},{wch:10},{wch:18},{wch:16},{wch:20},{wch:20},{wch:25},{wch:7},{wch:10},{wch:12},{wch:12},{wch:10},{wch:12}];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,'Bookings',ws);
+  XLSX.writeFile(wb,'TripBookings_'+new Date().toISOString().split('T')[0]+'.xlsx');
+};
+</script>
+</body>
+</html>
