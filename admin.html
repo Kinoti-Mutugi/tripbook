@@ -1,0 +1,1196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>TripBook Admin</title>
+<style>
+:root{--brown:#6b3a2a;--gold:#c8972a;--cream:#fdf6ee;--border:#e8ddd0;--muted:#9e8a78;--red:#c0392b;--amber:#d4830a;--wa:#25D366;--wa-dark:#128C7E;--green:#2e7d32;}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#1a1610;color:#f0e8dc;min-height:100vh}
+header{background:#111;padding:0.9rem 1.5rem;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--gold)}
+.logo{font-size:1.3rem;font-weight:800;color:#fff}.logo span{color:var(--gold)}
+.badge{background:var(--gold);color:#fff;font-size:0.7rem;font-weight:700;padding:0.2rem 0.55rem;border-radius:4px;margin-left:0.5rem;letter-spacing:1px}
+.back-btn{color:var(--muted);font-size:0.8rem;text-decoration:none;cursor:pointer}.back-btn:hover{color:var(--gold)}
+/* LOGIN */
+.login-wrap{max-width:360px;margin:5rem auto;padding:1.5rem;background:#26211a;border-radius:14px;border:1px solid #3a3028;box-shadow:0 4px 24px rgba(0,0,0,0.4)}
+.login-wrap h2{color:var(--gold);margin-bottom:0.3rem}
+.login-wrap p{color:var(--muted);font-size:0.82rem;margin-bottom:1.5rem}
+.ifield{width:100%;padding:0.65rem 0.9rem;border:1px solid #3a3028;border-radius:8px;font-size:0.9rem;background:#1a1610;color:#f0e8dc;margin-bottom:0.8rem;font-family:inherit}
+.ifield:focus{outline:none;border-color:var(--gold)}
+select.ifield{cursor:pointer}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:0.4rem;padding:0.6rem 1.1rem;border-radius:8px;font-size:0.85rem;font-weight:600;cursor:pointer;border:none;transition:all 0.2s}
+.btn-gold{background:var(--gold);color:#fff;justify-content:center}.btn-gold:hover{background:#a87820}
+.btn-full{width:100%}
+.btn-sm{padding:0.32rem 0.75rem;font-size:0.76rem}
+.btn-ghost{background:transparent;color:var(--gold);border:1px solid #3a3028}.btn-ghost:hover{border-color:var(--gold)}
+.btn-red{background:var(--red);color:#fff}.btn-red:hover{background:#96281b}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{background:#1b5e20}
+.btn-wa{background:var(--wa-dark);color:#fff}.btn-wa:hover{background:#075E54}
+.err{color:#e74c3c;font-size:0.8rem;margin-top:0.3rem;min-height:1em}
+.ok-msg{color:#81c784;font-size:0.8rem;margin-top:0.3rem;min-height:1em}
+/* CONFIG PANEL */
+.config-panel{max-width:640px;margin:2rem auto;padding:1.5rem;background:#26211a;border-radius:14px;border:1px solid var(--gold);display:none}
+.config-panel h3{color:var(--gold);margin-bottom:0.5rem}
+.config-panel p{color:var(--muted);font-size:0.82rem;margin-bottom:1.2rem;line-height:1.6}
+.config-panel label{display:block;font-size:0.78rem;color:var(--gold);margin-bottom:0.3rem;margin-top:0.8rem;font-weight:600}
+.save-note{background:#1a3a1a;border:1px solid #2e7d32;border-radius:8px;padding:0.8rem;font-size:0.8rem;color:#81c784;margin-top:1rem;line-height:1.6}
+/* TABS */
+#dashboard{display:none;max-width:1300px;margin:0 auto;padding:0 1rem 4rem}
+.tab-bar{display:flex;gap:0;border-bottom:2px solid #3a3028;margin-bottom:1.2rem;padding-top:0.8rem}
+.tab-btn{padding:0.55rem 1.2rem;background:none;border:none;color:var(--muted);font-size:0.88rem;font-weight:600;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all 0.2s}
+.tab-btn:hover{color:var(--gold)}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold)}
+.tab-panel{display:none}.tab-panel.active{display:block}
+/* DASHBOARD TAB */
+.dash-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.7rem;margin-bottom:1rem}
+.dash-top h2{color:var(--gold);font-size:1.1rem}
+.actions{display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.6rem;margin-bottom:1rem}
+.stat{background:#26211a;border-radius:10px;padding:0.8rem 1rem;border:1px solid #3a3028}
+.stat strong{display:block;font-size:1.35rem;color:var(--gold)}.stat span{font-size:0.76rem;color:var(--muted)}
+.stat.warn strong{color:var(--red)}.stat.pend strong{color:var(--amber)}.stat.ok strong{color:#81c784}
+.search{background:#26211a;border:1px solid #3a3028;border-radius:8px;padding:0.5rem 0.8rem;color:#f0e8dc;font-size:0.88rem;width:100%;max-width:280px;font-family:inherit}
+.search:focus{outline:none;border-color:var(--gold)}
+.tbl-wrap{overflow-x:auto;border-radius:10px;border:1px solid #3a3028}
+table{width:100%;border-collapse:collapse;font-size:0.8rem;background:#1e1a14}
+thead th{background:#2e2820;color:var(--gold);padding:0.6rem 0.5rem;text-align:left;white-space:nowrap;font-weight:700;border-bottom:1px solid #3a3028}
+tbody td{padding:0.5rem 0.5rem;border-bottom:1px solid #2e2820;vertical-align:middle;color:#d4c4b0}
+tbody tr:hover td{background:#26211a}
+.sbadge{padding:0.18rem 0.5rem;border-radius:4px;font-size:0.68rem;font-weight:700}
+.s-ok{background:#1a3a1a;color:#81c784}.s-dbl{background:#3a1a1a;color:#ef9a9a}
+.wa-btn{display:inline-block;background:var(--wa-dark);color:#fff;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.7rem;text-decoration:none;white-space:nowrap}.wa-btn:hover{background:#075E54}
+.fi{width:62px;padding:0.22rem 0.35rem;border:1px solid #3a3028;border-radius:4px;font-size:0.76rem;background:#1a1610;color:#f0e8dc}
+.set-btn{background:var(--gold);color:#fff;border:none;padding:0.26rem 0.55rem;border-radius:4px;font-size:0.7rem;cursor:pointer;font-weight:700;white-space:nowrap}.set-btn:hover{background:#a87820}
+.edit-btn{background:#2e2820;color:var(--gold);border:1px solid #3a3028;padding:0.2rem 0.45rem;border-radius:4px;font-size:0.7rem;cursor:pointer;white-space:nowrap}.edit-btn:hover{border-color:var(--gold)}
+/* SETTINGS TAB */
+.settings-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:1rem}
+.settings-card{background:#26211a;border-radius:12px;padding:1.2rem;border:1px solid #3a3028}
+.settings-card h3{color:var(--gold);font-size:0.95rem;margin-bottom:0.3rem;display:flex;align-items:center;gap:0.4rem}
+.settings-card p{color:var(--muted);font-size:0.78rem;margin-bottom:1rem;line-height:1.5}
+.settings-card label{display:block;font-size:0.78rem;color:var(--gold);font-weight:600;margin-bottom:0.3rem;margin-top:0.6rem}
+.settings-card label:first-of-type{margin-top:0}
+.field-row{display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:0.6rem}
+.field-row .ifield{margin-bottom:0;flex:1}
+/* SYNC STATUS */
+.sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:0.4rem}
+.sync-dot.live{background:#25D366;animation:pulse 2s infinite}
+.sync-dot.local{background:var(--amber)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem}.overlay.open{display:flex}
+.modal{background:#26211a;border-radius:12px;padding:1.4rem;max-width:420px;width:100%;border:1px solid #3a3028;max-height:90vh;overflow-y:auto}
+.modal h3{color:var(--gold);margin-bottom:1rem}
+/* DANGER ZONE */
+.danger-zone{border:1px solid var(--red);border-radius:8px;padding:0.8rem 1rem;margin-top:0.5rem}
+.danger-zone p{color:#ef9a9a;font-size:0.78rem;margin-bottom:0.6rem}
+/* AI TAB */
+.ai-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+@media(max-width:700px){.ai-grid{grid-template-columns:1fr}}
+.ai-card{background:#26211a;border-radius:12px;padding:1.2rem;border:1px solid #3a3028}
+.ai-card h3{color:var(--gold);font-size:0.95rem;margin-bottom:0.4rem;display:flex;align-items:center;gap:0.4rem}
+.ai-card p{color:var(--muted);font-size:0.78rem;margin-bottom:1rem;line-height:1.5}
+.ai-output{background:#111;border:1px solid #2a2218;border-radius:8px;padding:1rem;font-size:0.82rem;color:#d4c4b0;line-height:1.8;min-height:80px;white-space:pre-wrap;max-height:300px;overflow-y:auto}
+.ai-output.loading{color:var(--muted);font-style:italic}
+.ai-output.error{color:#ef9a9a}
+.ai-full{grid-column:1/-1}
+.week-controls{display:flex;gap:0.6rem;align-items:center;flex-wrap:wrap;margin-bottom:0.8rem}
+.week-report-out{background:#111;border:1px solid #2a2218;border-radius:8px;padding:1rem;font-size:0.82rem;color:#d4c4b0;line-height:1.9;white-space:pre-wrap;max-height:420px;overflow-y:auto}
+.apikey-row{display:flex;gap:0.5rem;align-items:center;margin-bottom:0.8rem}
+.apikey-row .ifield{margin-bottom:0;flex:1;font-size:0.78rem}
+/* ADD BOOKING MODAL */
+.modal-wide{max-width:600px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 0.8rem}
+@media(max-width:500px){.form-grid{grid-template-columns:1fr}}
+.form-grid .ifield{margin-bottom:0.6rem}
+.form-label{font-size:0.75rem;color:var(--gold);font-weight:600;display:block;margin-bottom:0.2rem;margin-top:0.4rem}
+.span-2{grid-column:1/-1}
+/* FLEET BUS PILLS */
+.fleet-bar{display:flex;gap:0.4rem;flex-wrap:wrap;align-items:center;margin-bottom:0.6rem;padding:0.5rem 0.7rem;background:#1e1a14;border:1px solid #3a3028;border-radius:8px}
+.fleet-label{font-size:0.72rem;color:var(--gold);font-weight:700;margin-right:0.3rem;white-space:nowrap}
+.bus-pill{padding:0.28rem 0.85rem;border-radius:16px;font-size:0.77rem;font-weight:800;cursor:pointer;border:2px solid #3a3028;background:#26211a;color:var(--muted);transition:all 0.18s;letter-spacing:0.05em;font-family:inherit}
+.bus-pill:hover{border-color:var(--gold);color:var(--gold)}
+.bus-pill.active{border-color:var(--gold);color:#fff}
+.bus-pill.all.active{background:#26211a;border-color:var(--gold);color:var(--gold)}
+.bus-KCA.active{background:#1a3a5a;border-color:#64b5f6;color:#64b5f6}
+.bus-KCC.active{background:#1a3a1a;border-color:#81c784;color:#81c784}
+.bus-KBV.active{background:#2e1a3a;border-color:#ce93d8;color:#ce93d8}
+.bus-KDV.active{background:#3a2c10;border-color:#ffd54f;color:#ffd54f}
+.bus-KBP.active{background:#3a1a1a;border-color:#ef9a9a;color:#ef9a9a}
+.bus-tag{display:inline-block;padding:0.13rem 0.45rem;border-radius:4px;font-size:0.67rem;font-weight:800;letter-spacing:0.05em;white-space:nowrap}
+.bus-tag-KCA{background:#1a3a5a;color:#64b5f6;border:1px solid #2a5a8a}
+.bus-tag-KCC{background:#1a3a1a;color:#81c784;border:1px solid #2a6a2a}
+.bus-tag-KBV{background:#2e1a3a;color:#ce93d8;border:1px solid #5a2a8a}
+.bus-tag-KDV{background:#3a2c10;color:#ffd54f;border:1px solid #7a5a10}
+.bus-tag-KBP{background:#3a1a1a;color:#ef9a9a;border:1px solid #8a2a2a}
+.bus-tag-none{background:#2e2820;color:var(--muted);border:1px solid #3a3028}
+/* DATE FILTER BAR */
+.date-bar{display:flex;gap:0.45rem;flex-wrap:wrap;align-items:center;padding:0.45rem 0.7rem;background:#1e1a14;border:1px solid #3a3028;border-radius:8px;margin-bottom:0.7rem}
+.date-bar label{font-size:0.72rem;color:var(--gold);font-weight:700;white-space:nowrap}
+.date-inp{background:#26211a;border:1px solid #3a3028;border-radius:5px;padding:0.3rem 0.5rem;color:#f0e8dc;font-size:0.8rem;font-family:inherit;cursor:pointer}
+.date-inp:focus{outline:none;border-color:var(--gold)}
+.date-inp::-webkit-calendar-picker-indicator{filter:invert(0.6)}
+.date-sep{color:var(--muted);font-size:0.8rem}
+.date-count{font-size:0.73rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Trip<span>Book</span><span class="badge">ADMIN</span></div>
+  <a class="back-btn" href="index.html">&#8592; Booking Page</a>
+</header>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <h2>&#128274; Admin Login</h2>
+    <p>This area is restricted to authorised personnel only.</p>
+    <input class="ifield" type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="err" id="loginErr"></div>
+    <button class="btn btn-gold btn-full" onclick="doLogin()">Login &#8594;</button>
+  </div>
+</div>
+
+<!-- FIREBASE CONFIG PANEL -->
+<div class="config-panel" id="configPanel">
+  <h3>&#9881; Connect Firebase</h3>
+  <p>Paste your Firebase config below. You only need to do this once.<br/>
+  Get it from: <strong>Firebase Console → Project Settings → Your Apps → SDK setup</strong></p>
+  <label>API Key</label><input class="ifield" id="cfg-apiKey" placeholder="AIzaSy..."/>
+  <label>Project ID</label><input class="ifield" id="cfg-projectId" placeholder="your-project-id"/>
+  <label>App ID</label><input class="ifield" id="cfg-appId" placeholder="1:123456789:web:abc..."/>
+  <label>Messaging Sender ID</label><input class="ifield" id="cfg-senderId" placeholder="123456789"/>
+  <div class="save-note">✅ After saving, bookings from ALL devices sync here in real-time.</div>
+  <div style="display:flex;gap:0.6rem;margin-top:1rem">
+    <button class="btn btn-ghost" onclick="skipConfig()">Skip for now</button>
+    <button class="btn btn-gold" style="flex:1" onclick="saveConfig()">Save &amp; Connect &#10003;</button>
+  </div>
+  <div class="err" id="cfgErr"></div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashboard">
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('bookings')">📋 Bookings</button>
+    <button class="tab-btn" onclick="switchTab('weekly')">📅 Weekly</button>
+    <button class="tab-btn" onclick="switchTab('ai')">🤖 AI Insights</button>
+    <button class="tab-btn" onclick="switchTab('settings')">⚙️ Settings</button>
+  </div>
+
+  <!-- ── BOOKINGS TAB ── -->
+  <div class="tab-panel active" id="tab-bookings">
+    <div class="dash-top">
+      <div style="display:flex;align-items:center;gap:0.5rem">
+        <h2>All Bookings</h2>
+        <span id="syncStatus" style="font-size:0.75rem;color:var(--muted)"></span>
+      </div>
+      <div class="actions">
+        <input class="search" type="text" placeholder="🔍 Search..." id="textSearch" oninput="applyFilters()"/>
+        <button class="btn btn-green btn-sm" onclick="openAddModal()">➕ Add Booking</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportExcel()">📥 Export</button>
+        <button class="btn btn-red btn-sm" onclick="doLogout()">Logout</button>
+      </div>
+    </div>
+    <!-- FLEET BUS SELECTION -->
+    <div class="fleet-bar">
+      <span class="fleet-label">🚌 Fleet:</span>
+      <button class="bus-pill all active" onclick="setBusFilter('')">All</button>
+      <button class="bus-pill bus-KCA" onclick="setBusFilter('KCA')">KCA</button>
+      <button class="bus-pill bus-KCC" onclick="setBusFilter('KCC')">KCC</button>
+      <button class="bus-pill bus-KBV" onclick="setBusFilter('KBV')">KBV</button>
+      <button class="bus-pill bus-KDV" onclick="setBusFilter('KDV')">KDV</button>
+      <button class="bus-pill bus-KBP" onclick="setBusFilter('KBP')">KBP</button>
+    </div>
+    <!-- DATE FILTER -->
+    <div class="date-bar">
+      <label>📅 Date:</label>
+      <input class="date-inp" type="date" id="dateFrom" oninput="applyFilters()" title="From date (exact if no To date)"/>
+      <span class="date-sep">→</span>
+      <input class="date-inp" type="date" id="dateTo" oninput="applyFilters()" title="To date"/>
+      <button onclick="setToday()" style="background:#2e2820;border:1px solid #3a3028;color:var(--gold);border-radius:5px;padding:0.27rem 0.6rem;font-size:0.71rem;cursor:pointer;font-weight:700;font-family:inherit">Today</button>
+      <button onclick="clearDateFilter()" style="background:none;border:1px solid #3a3028;color:var(--muted);border-radius:5px;padding:0.27rem 0.6rem;font-size:0.71rem;cursor:pointer;font-family:inherit">✕ Clear</button>
+      <span class="date-count" id="filterCount"></span>
+    </div>
+    <div class="stats" id="statsGrid"></div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Ref</th><th>Bus</th><th>Date</th><th>Day</th><th>Name</th>
+          <th>WhatsApp</th><th>Route</th><th>Notes</th><th>KM</th>
+          <th>Fee</th><th>Action</th><th>Status</th><th>Edit</th>
+        </tr></thead>
+        <tbody id="tBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS TAB ── -->
+  <div class="tab-panel" id="tab-settings">
+    <h2 style="color:var(--gold);margin-bottom:1rem">⚙️ Settings</h2>
+    <div class="settings-grid">
+
+      <!-- Admin Contact -->
+      <div class="settings-card">
+        <h3>💬 Admin WhatsApp</h3>
+        <p>The number that receives booking notifications. Include country code, no + or spaces.</p>
+        <label>WhatsApp Number</label>
+        <div class="field-row">
+          <input class="ifield" type="tel" id="s-phone" placeholder="254712345678"/>
+          <button class="btn btn-gold btn-sm" onclick="saveSettingPhone()">Save</button>
+        </div>
+        <div class="ok-msg" id="s-phone-ok"></div>
+      </div>
+
+      <!-- Business Name -->
+      <div class="settings-card">
+        <h3>🚌 Business Name</h3>
+        <p>Shown in WhatsApp messages sent to customers.</p>
+        <label>Business / Operator Name</label>
+        <div class="field-row">
+          <input class="ifield" type="text" id="s-bizname" placeholder="e.g. Senator Mugambi Imanyara"/>
+          <button class="btn btn-gold btn-sm" onclick="saveSettingBizName()">Save</button>
+        </div>
+        <div class="ok-msg" id="s-bizname-ok"></div>
+      </div>
+
+      <!-- Default Fee -->
+      <div class="settings-card">
+        <h3>💰 Default Fee Rates</h3>
+        <p>These values auto-fill when you set a fee for any booking.</p>
+        <label>Default Price per KM (KSh)</label>
+        <div class="field-row">
+          <input class="ifield" type="number" id="s-ppkm" placeholder="50"/>
+          <button class="btn btn-gold btn-sm" onclick="saveSettingRates()">Save</button>
+        </div>
+        <label>Default Driver Fee (KSh)</label>
+        <input class="ifield" type="number" id="s-driver" placeholder="1500" style="margin-bottom:0.6rem"/>
+        <div class="ok-msg" id="s-rates-ok"></div>
+      </div>
+
+      <!-- Password -->
+      <div class="settings-card">
+        <h3>🔑 Change Password</h3>
+        <p>Change your admin login password. Minimum 6 characters.</p>
+        <label>Current Password</label>
+        <input class="ifield" type="password" id="s-curpass" placeholder="Current password"/>
+        <label>New Password</label>
+        <input class="ifield" type="password" id="s-newpass" placeholder="New password (min 6 chars)"/>
+        <label>Confirm New Password</label>
+        <input class="ifield" type="password" id="s-conpass" placeholder="Confirm new password"/>
+        <div class="err" id="s-pass-err"></div>
+        <button class="btn btn-gold btn-full" style="margin-top:0.5rem" onclick="saveSettingPass()">Change Password</button>
+      </div>
+
+      <!-- Firebase Config -->
+      <div class="settings-card">
+        <h3>🔥 Firebase Connection</h3>
+        <p>Update your Firebase config if you need to reconnect or switch projects.</p>
+        <label>API Key</label>
+        <input class="ifield" type="text" id="s-apikey" placeholder="AIzaSy..."/>
+        <label>Project ID</label>
+        <input class="ifield" type="text" id="s-projectid" placeholder="your-project-id"/>
+        <label>App ID</label>
+        <input class="ifield" type="text" id="s-appid" placeholder="1:123456789:web:abc..."/>
+        <label>Messaging Sender ID</label>
+        <input class="ifield" type="text" id="s-senderid" placeholder="123456789"/>
+        <div class="ok-msg" id="s-firebase-ok"></div>
+        <button class="btn btn-gold btn-full" style="margin-top:0.8rem" onclick="saveSettingFirebase()">Save &amp; Reconnect</button>
+      </div>
+
+      <!-- WhatsApp Message Templates -->
+      <div class="settings-card">
+        <h3>📝 WhatsApp Message Preview</h3>
+        <p>This is the fee message sent to customers. It uses your business name and booking details automatically.</p>
+        <div style="background:#1a1610;border:1px solid #3a3028;border-radius:8px;padding:0.8rem;font-size:0.78rem;color:#d4c4b0;line-height:1.7;white-space:pre-wrap" id="msgPreview"></div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="settings-card">
+        <h3 style="color:var(--red)">⚠️ Danger Zone</h3>
+        <p>These actions cannot be undone. Use with caution.</p>
+        <div class="danger-zone">
+          <p>Clear all bookings from local storage. This does NOT delete Firebase data.</p>
+          <button class="btn btn-red btn-sm" onclick="clearLocalData()">🗑 Clear Local Data</button>
+        </div>
+        <div class="danger-zone" style="margin-top:0.7rem">
+          <p>Disconnect Firebase and re-enter config on next login.</p>
+          <button class="btn btn-red btn-sm" onclick="disconnectFirebase()">🔌 Disconnect Firebase</button>
+        </div>
+      </div>
+
+    </div><!-- end settings-grid -->
+  </div><!-- end tab-settings -->
+
+  <!-- ── WEEKLY TAB ── -->
+  <div class="tab-panel" id="tab-weekly">
+    <h2 style="color:var(--gold);margin-bottom:0.5rem">📅 Weekly Booking Report</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1rem">Pick any week to generate a full report. Print it or share via WhatsApp.</p>
+    <div class="week-controls">
+      <div>
+        <label class="form-label">Week Starting (Monday)</label>
+        <input class="ifield" type="date" id="week-start" style="margin-bottom:0;width:auto"/>
+      </div>
+      <div style="margin-top:1.4rem;display:flex;gap:0.5rem">
+        <button class="btn btn-gold btn-sm" onclick="genWeekReport()">📋 Generate Report</button>
+        <button class="btn btn-ghost btn-sm" onclick="printWeekReport()">🖨 Print</button>
+        <button class="btn btn-ghost btn-sm" onclick="shareWeekReport()">💬 WhatsApp</button>
+        <button class="btn btn-ghost btn-sm" onclick="exportWeekExcel()">📥 Excel</button>
+      </div>
+    </div>
+    <div id="week-report-out" class="week-report-out" style="display:none"></div>
+    <div id="week-print-area" style="display:none"></div>
+  </div>
+
+  <!-- ── AI TAB ── -->
+  <div class="tab-panel" id="tab-ai">
+    <h2 style="color:var(--gold);margin-bottom:0.4rem">🤖 AI Insights</h2>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:1rem">Powered by Claude AI — analyses your real booking data and gives you smart recommendations.</p>
+
+    <!-- API Key input -->
+    <div class="settings-card" style="margin-bottom:1rem">
+      <h3>🔑 Claude API Key</h3>
+      <p>Enter your Anthropic API key to enable AI insights. Get one free at <strong>console.anthropic.com</strong></p>
+      <div class="apikey-row">
+        <input class="ifield" type="password" id="ai-apikey" placeholder="sk-ant-..."/>
+        <button class="btn btn-gold btn-sm" onclick="saveApiKey()">Save Key</button>
+      </div>
+      <div class="ok-msg" id="ai-key-ok"></div>
+    </div>
+
+    <div class="ai-grid">
+      <!-- Revenue Analysis -->
+      <div class="ai-card">
+        <h3>💰 Revenue Analysis</h3>
+        <p>Total earnings breakdown, best months, average per trip.</p>
+        <button class="btn btn-gold btn-sm" style="margin-bottom:0.7rem" onclick="runAI('revenue')">▶ Analyse Revenue</button>
+        <div class="ai-output" id="ai-revenue">Click the button to analyse your revenue...</div>
+      </div>
+
+      <!-- Busiest Days -->
+      <div class="ai-card">
+        <h3>📅 Busiest Days & Routes</h3>
+        <p>Which days and routes get booked the most.</p>
+        <button class="btn btn-gold btn-sm" style="margin-bottom:0.7rem" onclick="runAI('routes')">▶ Analyse Routes</button>
+        <div class="ai-output" id="ai-routes">Click the button to analyse your routes...</div>
+      </div>
+
+      <!-- Client Insights -->
+      <div class="ai-card">
+        <h3>👥 Client Insights</h3>
+        <p>Top clients, repeat bookers, follow-up suggestions.</p>
+        <button class="btn btn-gold btn-sm" style="margin-bottom:0.7rem" onclick="runAI('clients')">▶ Analyse Clients</button>
+        <div class="ai-output" id="ai-clients">Click the button to analyse your clients...</div>
+      </div>
+
+      <!-- Pricing Advice -->
+      <div class="ai-card">
+        <h3>📈 Pricing Advice</h3>
+        <p>Should you charge more? Which trips are underpriced?</p>
+        <button class="btn btn-gold btn-sm" style="margin-bottom:0.7rem" onclick="runAI('pricing')">▶ Get Pricing Advice</button>
+        <div class="ai-output" id="ai-pricing">Click the button for pricing advice...</div>
+      </div>
+
+      <!-- Full Summary -->
+      <div class="ai-card ai-full">
+        <h3>🧠 Full Business Summary</h3>
+        <p>Complete AI analysis of your entire booking history with actionable recommendations.</p>
+        <div style="display:flex;gap:0.5rem;margin-bottom:0.7rem;flex-wrap:wrap">
+          <button class="btn btn-gold btn-sm" onclick="runAI('summary')">▶ Full Summary</button>
+          <button class="btn btn-ghost btn-sm" onclick="askAI()">💬 Ask AI Anything</button>
+        </div>
+        <textarea class="ifield" id="ai-question" placeholder="Ask anything about your bookings e.g. Which client should I follow up with this week?" style="margin-bottom:0.5rem;height:60px;resize:vertical;display:none"></textarea>
+        <div class="ai-output" id="ai-summary">Click Full Summary for a complete business analysis...</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end dashboard -->
+
+<!-- ADD BOOKING MODAL -->
+<div class="overlay" id="addOverlay">
+  <div class="modal modal-wide">
+    <h3>➕ Add New Booking</h3>
+    <div class="form-grid">
+      <div>
+        <label class="form-label">Date *</label>
+        <input class="ifield" type="date" id="add-date"/>
+      </div>
+      <div>
+        <label class="form-label">Status</label>
+        <select class="ifield" id="add-status">
+          <option value="Confirmed">Confirmed</option>
+          <option value="Booked">Booked</option>
+          <option value="Pending">Pending</option>
+          <option value="">— Unknown —</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">🚌 Assign Bus *</label>
+        <select class="ifield" id="add-bus">
+          <option value="">— Select Bus —</option>
+          <option value="KCA">KCA</option>
+          <option value="KCC">KCC</option>
+          <option value="KBV">KBV</option>
+          <option value="KDV">KDV</option>
+          <option value="KBP">KBP</option>
+        </select>
+      </div>
+      <div>
+        <label class="form-label">Client Name *</label>
+        <input class="ifield" type="text" id="add-name" placeholder="Full name"/>
+      </div>
+      <div>
+        <label class="form-label">WhatsApp Number</label>
+        <input class="ifield" type="tel" id="add-phone" placeholder="254712345678"/>
+      </div>
+      <div>
+        <label class="form-label">From (Origin)</label>
+        <input class="ifield" type="text" id="add-from" placeholder="e.g. Meru Town"/>
+      </div>
+      <div>
+        <label class="form-label">To (Destination)</label>
+        <input class="ifield" type="text" id="add-to" placeholder="e.g. Nairobi"/>
+      </div>
+      <div class="span-2">
+        <label class="form-label">Trip Notes / Purpose</label>
+        <input class="ifield" type="text" id="add-notes" placeholder="e.g. Burial, School Trip, Church..."/>
+      </div>
+      <div>
+        <label class="form-label">Distance (KM)</label>
+        <input class="ifield" type="number" id="add-km" placeholder="e.g. 200"/>
+      </div>
+      <div>
+        <label class="form-label">Price per KM (KSh)</label>
+        <input class="ifield" type="number" id="add-ppkm" placeholder="50"/>
+      </div>
+      <div>
+        <label class="form-label">Driver Fee (KSh)</label>
+        <input class="ifield" type="number" id="add-driver" placeholder="1500"/>
+      </div>
+      <div>
+        <label class="form-label">Total Fee (KSh) — auto-calculated</label>
+        <input class="ifield" type="number" id="add-total" placeholder="Leave blank to auto-calculate"/>
+      </div>
+    </div>
+    <div class="err" id="add-err"></div>
+    <div style="display:flex;gap:0.6rem;margin-top:0.8rem">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="saveNewBooking()">✅ Save Booking</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT BOOKING MODAL -->
+<div class="overlay" id="editOverlay">
+  <div class="modal">
+    <h3>✏️ Edit Booking</h3>
+    <input type="hidden" id="edit-ref"/>
+    <input type="hidden" id="edit-docid"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Date</label>
+    <input class="ifield" type="date" id="edit-date"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Name</label>
+    <input class="ifield" type="text" id="edit-name"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">WhatsApp</label>
+    <input class="ifield" type="tel" id="edit-phone"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">From</label>
+    <input class="ifield" type="text" id="edit-from"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">To</label>
+    <input class="ifield" type="text" id="edit-to"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Notes</label>
+    <input class="ifield" type="text" id="edit-notes"/>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem">Status</label>
+    <select class="ifield" id="edit-status">
+      <option value="">— Select status —</option>
+      <option value="Confirmed">Confirmed</option>
+      <option value="Pending">Pending</option>
+      <option value="Cancelled">Cancelled</option>
+      <option value="Completed">Completed</option>
+    </select>
+    <label style="color:var(--gold);font-size:0.78rem;font-weight:600;display:block;margin-bottom:0.3rem;margin-top:0.6rem">🚌 Bus</label>
+    <select class="ifield" id="edit-bus">
+      <option value="">— Unassigned —</option>
+      <option value="KCA">KCA</option>
+      <option value="KCC">KCC</option>
+      <option value="KBV">KBV</option>
+      <option value="KDV">KDV</option>
+      <option value="KBP">KBP</option>
+    </select>
+    <div class="err" id="edit-err"></div>
+    <div style="display:flex;gap:0.6rem;margin-top:0.8rem">
+      <button class="btn btn-ghost" style="flex:1;justify-content:center" onclick="closeEditModal()">Cancel</button>
+      <button class="btn btn-red btn-sm" onclick="deleteBooking()">🗑 Delete</button>
+      <button class="btn btn-gold" style="flex:1;justify-content:center" onclick="saveEditBooking()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getFirestore,collection,onSnapshot,doc,getDoc,setDoc,updateDoc,deleteDoc,query,orderBy}
+  from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ── HELPERS ────────────────────────────────────────────────────────────────
+function getAdminPass(){return localStorage.getItem('tripbook_admin_pass')||'admin123';}
+function getSetting(k,def=''){return localStorage.getItem('tripbook_'+k)||def;}
+// ── SEED DATA FROM EXCEL (calendar_2026) ─────────────────────────────────
+const SEED_BOOKINGS = [{"ref":"CAL001","date":"2026-02-06","day":"Friday","name":"Richard","phone":"254723450764","from":"karumo laare leenyoka nkubu","to":"","notes":"Burial","km":134.0,"ppkm":50.0,"driver":1500.0,"total":8500.0,"feeSet":true,"status":"Confirmed","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL002","date":"2026-02-07","day":"Saturday","name":"Tech","phone":"254726093805","from":"ucima","to":"isiolo northern gate","notes":"Uchima Primary School \u2013 Teacher Education Tour","km":166.0,"ppkm":50.0,"driver":1500.0,"total":10100.0,"feeSet":true,"status":"Confirmed","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL003","date":"2026-02-08","day":"Sunday","name":"david kitinji","phone":"","from":"karama","to":"kicc","notes":"Church Matter","km":564.0,"ppkm":50.0,"driver":1500.0,"total":30000.0,"feeSet":true,"status":"Confirmed","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL004","date":"2026-02-09","day":"Monday","name":"","phone":"254imanyaramugambi","from":"","to":"","notes":"Deliver students denied admission","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL005","date":"2026-02-10","day":"Tuesday","name":"Councilor Murithi","phone":"","from":"Muchogomo","to":"Meru General Hospital","notes":"Trip","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"Booked","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL006","date":"2026-02-11","day":"Wednesday","name":"lilian","phone":"254715016028","from":"st. pauls njogune","to":"mikinduri","notes":"prayer","km":129.0,"ppkm":50.0,"driver":1500.0,"total":8250.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL007","date":"2026-02-14","day":"Saturday","name":"Monica","phone":"254785431322","from":"Mwichiune Primary - Chugu Primary","to":"","notes":"Uthoni","km":68.2,"ppkm":50.0,"driver":1500.0,"total":5410.0,"feeSet":true,"status":"Confirmed","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL008","date":"2026-02-14","day":"Saturday","name":"Father Roy","phone":"","from":"Nanyuki","to":"Karama","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"More details to follow","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL009","date":"2026-02-15","day":"Sunday","name":"Mawira","phone":"254721543311","from":"mweru","to":"st.annes Igoji","notes":"MCK Ovile","km":31.4,"ppkm":50.0,"driver":1500.0,"total":3370.0,"feeSet":true,"status":"Confirmed","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL010","date":"2026-02-16","day":"Monday","name":"","phone":"","from":"","to":"","notes":"Deliver students denied admission","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL011","date":"2026-02-17","day":"Tuesday","name":"Reverend Muriuki","phone":"","from":"Mweru Igoji","to":"St.Annes Igoji","notes":"Booking","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL012","date":"2026-02-18","day":"Wednesday","name":"Cllr. Murithi","phone":"","from":"Igoji (South Imenti) \u2192 Kiina Game Park, Igembe","to":"","notes":"Group Trip","km":0.0,"ppkm":50.0,"driver":1500.0,"total":1800.0,"feeSet":true,"status":"Confirmed","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL013","date":"2026-02-19","day":"Thursday","name":"Purity","phone":"","from":"Nkung'i","to":"Consolata Hospital","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"Booked","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL014","date":"2026-02-19","day":"Thursday","name":"Mwalimu Mitoorire","phone":"","from":"","to":"","notes":"Burial","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"Booked","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL015","date":"2026-02-20","day":"Friday","name":"","phone":"","from":"NKUBU mARKET","to":"kionyo catholic church","notes":"Marcela","km":null,"ppkm":50,"driver":1500,"total":5500.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL016","date":"2026-02-21","day":"Saturday","name":"abuana","phone":"","from":"gakoromone","to":"mariara","notes":"","km":57.2,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL017","date":"2026-02-22","day":"Sunday","name":"","phone":"","from":"Maua meru","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"Booked","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL018","date":"2026-02-24","day":"Tuesday","name":"","phone":"","from":"Maua mortuary","to":"kaurine","notes":"Nkubu Eapc","km":null,"ppkm":50,"driver":1500,"total":11708.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL019","date":"2026-02-26","day":"Thursday","name":"Hon marete","phone":"","from":"Giakii","to":"","notes":"s.imenti-uruku kaubau","km":null,"ppkm":50,"driver":1500,"total":7800.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL020","date":"2026-02-26","day":"Thursday","name":"Pastor Mutethia","phone":"","from":"Mulika Market","to":"Laare Market","notes":"CLF meeting trip","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL021","date":"2026-02-27","day":"Friday","name":"","phone":"254EdwardKanthunkumi","from":"Kagendapara","to":"Nkubu","notes":"Burial purposes","km":null,"ppkm":50,"driver":1500,"total":4604.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL022","date":"2026-02-27","day":"Friday","name":"Councillor Murithi","phone":"","from":"Kinoro EAPC","to":"Kandebene Market.","notes":"chuirch trip","km":158.4,"ppkm":50,"driver":1500,"total":13874.0,"feeSet":true,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL023","date":"2026-02-28","day":"Saturday","name":"Kinyua M'ikiara","phone":"","from":"Uruku MCk","to":"SILOS CULTURE HOTEL near Mitunguu polytechnic","notes":"Men fellowship visit to SILOS CULTURE HOTEL","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL024","date":"2026-02-28","day":"Saturday","name":"","phone":"254728544291","from":"","to":"","notes":"Feb Uthoni c.imenti-keeria igoji","km":null,"ppkm":50,"driver":1500,"total":8090.0,"feeSet":true,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL025","date":"2026-03-01","day":"Sunday","name":"Irene","phone":"","from":"Mwichiune Primary","to":"Kithoka Mwanika","notes":"Trip to Kithoka Mwanika","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL026","date":"2026-03-01","day":"Sunday","name":"ex-chief kirimi","phone":"","from":"24th","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL027","date":"2026-03-02","day":"Monday","name":"Kichwa","phone":"254712484651","from":"Kathiranga primary school -> Cool breeze","to":"","notes":"Burial purposes","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL028","date":"2026-03-03","day":"Tuesday","name":"Gichuru","phone":"254729497397","from":"Ndagene","to":"Consolata","notes":"","km":null,"ppkm":50,"driver":1500,"total":3320.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL029","date":"2026-03-04","day":"Wednesday","name":"","phone":"254724722293","from":"Mikumbune -> Kirigara -> Chaaria Hospital","to":"","notes":"Nicholas's burial","km":null,"ppkm":5600.0,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL030","date":"2026-03-05","day":"THURSDAY","name":"","phone":"","from":"NKURIGA","to":"KANYAKINE","notes":"BURIAL","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL031","date":"2026-03-05","day":"THURSDAY","name":"kiganjone to consolata ","phone":"254723615654","from":"FROM GATURENE","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL032","date":"2026-03-06","day":"Friday","name":"Muthomi Irura","phone":"","from":"KIthaene","to":"Nkubu Consolata","notes":"","km":null,"ppkm":50,"driver":1500,"total":4400.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL033","date":"2026-03-06","day":"Friday","name":"","phone":"","from":"Kirigara","to":"Kanyakine","notes":"","km":66.0,"ppkm":50,"driver":1500,"total":6000.0,"feeSet":true,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL034","date":"2026-03-07","day":"Saturday","name":"Francis Muriungi","phone":"","from":"","to":"","notes":"more details to follow","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL035","date":"2026-03-07","day":"Saturday","name":"mwenda ","phone":"","from":"tharu","to":"Njuri","notes":"","km":null,"ppkm":50,"driver":1500,"total":6200.0,"feeSet":true,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL036","date":"2026-03-08","day":"Sunday","name":"","phone":"","from":"mitunguu primary","to":"timau stadium","notes":"","km":null,"ppkm":50,"driver":1500,"total":12500.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL037","date":"2026-03-09","day":"Kionyo","name":"more details to follow","phone":"","from":"Chriss","to":"","notes":"Kithaene","km":200.0,"ppkm":50.0,"driver":1500.0,"total":11800.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL038","date":"2026-03-10","day":"Tuesday","name":"","phone":"254kirimi","from":"kionyo","to":"consolata","notes":"","km":null,"ppkm":50,"driver":1500,"total":6200.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL039","date":"2026-03-11","day":"Nkubu","name":"damage done is 6200","phone":"","from":"YMartin","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":6200.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL040","date":"2026-03-12","day":"Thursday","name":"Muthuri","phone":"","from":"Mikumbune Rugomo","to":"Kiirua Mission Hospital","notes":"Booking","km":null,"ppkm":50,"driver":1500,"total":7200.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL041","date":"2026-03-13","day":"gitumbene","name":"damage done is 5000","phone":"254734566489","from":"kathiora","to":"","notes":"kanyakine","km":null,"ppkm":50,"driver":1500,"total":5000.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL042","date":"2026-03-14","day":"Saturday","name":"","phone":"254Muthoniimanyara","from":"chure dairy","to":"mitunguu saharan hotel","notes":"","km":null,"ppkm":50,"driver":1500,"total":6800.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL043","date":"2026-03-15","day":"Sunday","name":"Ndagene","phone":"","from":"mutunguru","to":"","notes":"NDAGENE TO CHUKA","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL044","date":"2026-03-15","day":"Sunday","name":"mwalimu Mitorire","phone":"254721301833","from":"Full Gospel chr S.imenti-- Chuka kiagundo","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL045","date":"2026-03-16","day":"Mutunguru","name":"damage by mugambi Imanyara","phone":"","from":"councillor murithi","to":"","notes":"wathine","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL046","date":"2026-03-19","day":"Thursday","name":"Festus muriungi","phone":"254723348808","from":"nchiru","to":"","notes":"Uthoni n.iment Nkabune","km":null,"ppkm":50.0,"driver":1500.0,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL047","date":"2026-03-21","day":"Saturday","name":"","phone":"254728486013","from":"Kathera","to":"Uruku Nkando","notes":"","km":4000.0,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL048","date":"2026-03-21","day":"Saturday","name":"","phone":"254706898184","from":"Mwichiune(Kajugene)","to":"Maua Kiegoi Village","notes":"","km":null,"ppkm":50,"driver":1500,"total":4270.0,"feeSet":true,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL049","date":"2026-03-22","day":"KK market","name":"","phone":"","from":"Anthony Kinoti","to":"","notes":"wathine","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL050","date":"2026-03-23","day":"mutunguru","name":"damage by mugambi Imanyara","phone":"","from":"councillor murithi","to":"","notes":"wathine","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL051","date":"2026-03-26","day":"Nkubu market","name":"","phone":"","from":"Asenath","to":"","notes":"all saints cathedral nairobi then to mwihoko sukari","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL052","date":"2026-03-27","day":"Kithangari Primary School","name":"damage done is 4500","phone":"254726081539","from":"Mrs. Kiogora","to":"","notes":"Side Havenes","km":null,"ppkm":50,"driver":1500,"total":4500.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL053","date":"2026-03-28","day":"Saturday","name":"","phone":"254Charity(0723698392)","from":"Bubui","to":"Cathedral Meru Town","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL054","date":"2026-03-28","day":"Gaturi","name":"","phone":"254712442891","from":"Joyce","to":"","notes":"Gitoro","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL055","date":"2026-03-30","day":"Kinoro market","name":"damage Mugambi Imanyara","phone":"","from":"cllr Murithi","to":"","notes":"wathine","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL056","date":"2026-04-04","day":"Saturday","name":"","phone":"254exchief","from":"Kionyo","to":"Machikkine","notes":"","km":null,"ppkm":50,"driver":1500,"total":3500.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL057","date":"2026-04-04","day":"Saturday","name":"Festus","phone":"","from":"Maua","to":"","notes":"Uthoni N.imenti Gitimbene","km":null,"ppkm":50,"driver":1500,"total":10210.0,"feeSet":true,"status":"","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL058","date":"2026-04-06","day":"Kaura pry school","name":"damage by mugambi Imanyara","phone":"","from":"cllr murithi","to":"","notes":"wathine","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL059","date":"2026-04-11","day":"Saturday","name":"Rose Ngaku","phone":"","from":"Kathigu","to":"Kiringa","notes":"Booking","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL060","date":"2026-04-11","day":"Saturday","name":"","phone":"25473222087","from":"Mucogomone","to":"kithangari achievers","notes":"Uthoni","km":49.4,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"ex chief to make a second booking","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL061","date":"2026-04-12","day":"Kithaene","name":"","phone":"","from":"Muthomi Irura","to":"","notes":"Nkoe grounds","km":null,"ppkm":50,"driver":1500,"total":13400.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL062","date":"2026-04-13","day":"Golgotha","name":"damage done mugambi imanyara","phone":"","from":"cllr murithi","to":"","notes":"Wathine","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL063","date":"2026-04-18","day":"Saturday","name":"kinyamu","phone":"254795166078","from":"EMBU","to":"","notes":"UTHONI Sat s.imenti Igoji West KAARIA","km":164.0,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL064","date":"2026-04-22","day":"Wednesday","name":"","phone":"254713911330","from":"Kithangari","to":"Nairobi","notes":"Kithangari school learners trip to Nairobi","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL065","date":"2026-04-25","day":"Saturday","name":"Partrick Micheni","phone":"","from":"Mikumbune","to":"kirimara Primary scdhool","notes":"Uthoni","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL066","date":"2026-04-26","day":"Kionyo","name":"damage to one confirmed","phone":"254105254011","from":"Dorothy Mwenda","to":"","notes":"Kiamogogo","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL067","date":"2026-05-01","day":"Friday","name":"","phone":"","from":"Nkubu rubis -> Saharan hotel","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL068","date":"2026-05-08","day":"Friday","name":"Moreen PTA","phone":"254104934833","from":"s.imenti Kithangari pry sch students--OLOJO Nanyuki","to":"","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL069","date":"2026-05-09","day":"Saturday","name":"Karwego","phone":"254701857506","from":"Kabaune Ka Menwe","to":"chaaria","notes":"","km":null,"ppkm":50,"driver":1500,"total":6200.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL070","date":"2026-05-15","day":"Friday","name":"","phone":"254710136294","from":"","to":"","notes":"machikine primary trip","km":null,"ppkm":50,"driver":1500,"total":11170.0,"feeSet":true,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL071","date":"2026-05-16","day":"Saturday","name":"GAcheri","phone":"","from":"Kithurine kobia junction","to":"","notes":"Uthoni s.imenti Gumpira","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL072","date":"2026-05-22","day":"Friday","name":"PTA moreen Wajudy","phone":"","from":"Kiina park","to":"","notes":"s.imenti Kithangari pry sch students","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL073","date":"2026-05-23","day":"mikumbune market","name":"","phone":"254726028116","from":"titus mutai","to":"","notes":"michimikuru factory","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL074","date":"2026-05-23","day":"Saturday","name":"Ex-chief Kirimi","phone":"","from":"Kionyo Market","to":"Gumpira and back","notes":"Trip","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"Booked","isDouble":true,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL075","date":"2026-08-15","day":"Saturday","name":"MCA Carol","phone":"","from":"Kagwampungu","to":"MCK Olives to Gatinya","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL076","date":"2026-08-22","day":"Saturday","name":"Morris gikunda","phone":"","from":"Mucecune","to":"ucima primary","notes":"","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"},{"ref":"CAL077","date":"2026-08-26","day":"Saturday","name":"","phone":"254710669162","from":"Gakumukumu","to":"maxwell stage to gatong'o","notes":"Gitine primary school","km":null,"ppkm":50,"driver":1500,"total":null,"feeSet":false,"status":"","isDouble":false,"createdAt":"2026-01-01T00:00:00.000Z"}];
+const SEED_COUNTS   = {"2026-02-06":1,"2026-02-07":1,"2026-02-08":1,"2026-02-09":1,"2026-02-10":1,"2026-02-11":1,"2026-02-14":2,"2026-02-15":1,"2026-02-16":1,"2026-02-17":1,"2026-02-18":1,"2026-02-19":2,"2026-02-20":1,"2026-02-21":1,"2026-02-22":1,"2026-02-24":1,"2026-02-26":2,"2026-02-27":2,"2026-02-28":2,"2026-03-01":2,"2026-03-02":1,"2026-03-03":1,"2026-03-04":1,"2026-03-05":2,"2026-03-06":2,"2026-03-07":2,"2026-03-08":1,"2026-03-09":1,"2026-03-10":1,"2026-03-11":1,"2026-03-12":1,"2026-03-13":1,"2026-03-14":1,"2026-03-15":2,"2026-03-16":1,"2026-03-19":1,"2026-03-21":2,"2026-03-22":1,"2026-03-23":1,"2026-03-26":1,"2026-03-27":1,"2026-03-28":2,"2026-03-30":1,"2026-04-04":2,"2026-04-06":1,"2026-04-11":2,"2026-04-12":1,"2026-04-13":1,"2026-04-18":1,"2026-04-22":1,"2026-04-25":1,"2026-04-26":1,"2026-05-01":1,"2026-05-08":1,"2026-05-09":1,"2026-05-15":1,"2026-05-16":1,"2026-05-22":1,"2026-05-23":2,"2026-08-15":1,"2026-08-22":1,"2026-08-26":1};
+const SEED_VERSION  = 'v4_cal2026';
+
+function injectSeedData(){
+  if(localStorage.getItem('tripbook_version')===SEED_VERSION) return;
+  // Wipe old data
+  localStorage.removeItem('tripbook_private_v3');
+  localStorage.removeItem('tripbook_shared_v3');
+  // Save new seed
+  localStorage.setItem('tripbook_private_v3', JSON.stringify(SEED_BOOKINGS));
+  localStorage.setItem('tripbook_shared_v3', JSON.stringify(SEED_COUNTS));
+  localStorage.setItem('tripbook_version', SEED_VERSION);
+  console.log('Seed data injected:', SEED_BOOKINGS.length, 'bookings');
+}
+injectSeedData();
+// ─────────────────────────────────────────────────────────────────────────
+
+function saveSetting(k,v){localStorage.setItem('tripbook_'+k,v);}
+
+let ADMIN_PHONE = getSetting('admin_phone','254712000000');
+let BIZ_NAME    = getSetting('biz_name','Senator Mugambi Imanyara');
+let DEF_PPKM    = parseFloat(getSetting('def_ppkm','50'));
+let DEF_DRIVER  = parseFloat(getSetting('def_driver','1500'));
+
+let db=null, allBookings=[], unsubscribe=null, activeBus='';
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+window.switchTab=function(tab){
+  const tabs=['bookings','weekly','ai','settings'];
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',tabs[i]===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='settings') loadSettingsForm();
+  if(tab==='ai') loadAiKey();
+};
+
+// ── AUTH ───────────────────────────────────────────────────────────────────
+window.doLogin=function(){
+  const pass=document.getElementById('adminPass').value;
+  if(pass!==getAdminPass()){document.getElementById('loginErr').textContent='❌ Incorrect password.';return;}
+  document.getElementById('loginScreen').style.display='none';
+  const saved=getSavedConfig();
+  if(!saved){document.getElementById('configPanel').style.display='block';}
+  else{initFirebase(buildConfig(saved));}
+};
+document.getElementById('adminPass').addEventListener('keydown',e=>{if(e.key==='Enter')window.doLogin();});
+window.doLogout=function(){
+  if(unsubscribe)unsubscribe();
+  document.getElementById('dashboard').style.display='none';
+  document.getElementById('loginScreen').style.display='block';
+  document.getElementById('adminPass').value='';
+  document.getElementById('loginErr').textContent='';
+};
+
+// ── FIREBASE CONFIG ────────────────────────────────────────────────────────
+function getSavedConfig(){try{return JSON.parse(localStorage.getItem('tripbook_firebase_config')||'null');}catch{return null;}}
+function buildConfig(cfg){return{apiKey:cfg.apiKey,authDomain:`${cfg.projectId}.firebaseapp.com`,projectId:cfg.projectId,storageBucket:`${cfg.projectId}.appspot.com`,messagingSenderId:cfg.senderId,appId:cfg.appId};}
+
+window.saveConfig=function(){
+  const cfg={apiKey:document.getElementById('cfg-apiKey').value.trim(),projectId:document.getElementById('cfg-projectId').value.trim(),appId:document.getElementById('cfg-appId').value.trim(),senderId:document.getElementById('cfg-senderId').value.trim()};
+  if(!cfg.apiKey||!cfg.projectId){document.getElementById('cfgErr').textContent='❌ API Key and Project ID are required.';return;}
+  localStorage.setItem('tripbook_firebase_config',JSON.stringify(cfg));
+  document.getElementById('configPanel').style.display='none';
+  initFirebase(buildConfig(cfg));
+};
+window.skipConfig=function(){
+  document.getElementById('configPanel').style.display='none';
+  document.getElementById('dashboard').style.display='block';
+  loadLocalBookings(); setSyncStatus(false);
+};
+
+function initFirebase(config){
+  try{
+    const app=initializeApp(config); db=getFirestore(app);
+    document.getElementById('dashboard').style.display='block';
+    setSyncStatus(true);
+    const q=query(collection(db,'bookings'),orderBy('date'));
+    unsubscribe=onSnapshot(q,snap=>{
+      allBookings=snap.docs.map(d=>({id:d.id,...d.data()}));
+      applyFilters();
+    },err=>{console.error(err);setSyncStatus(false);loadLocalBookings();});
+    // Load settings from Firestore (getDoc already imported at top)
+    getDoc(doc(db,'meta','settings')).then(s=>{
+      if(s.exists()){
+        const d=s.data();
+        if(d.adminPhone){ADMIN_PHONE=d.adminPhone;saveSetting('admin_phone',d.adminPhone);}
+        if(d.bizName){BIZ_NAME=d.bizName;saveSetting('biz_name',d.bizName);}
+        if(d.defPpkm){DEF_PPKM=d.defPpkm;saveSetting('def_ppkm',d.defPpkm);}
+        if(d.defDriver){DEF_DRIVER=d.defDriver;saveSetting('def_driver',d.defDriver);}
+      }
+    }).catch(e=>console.error('Failed to load settings:',e));
+  }catch(e){
+    alert('❌ Firebase connection failed.\n\nError: '+e.message);
+    document.getElementById('configPanel').style.display='block';
+  }
+}
+function setSyncStatus(live){
+  document.getElementById('syncStatus').innerHTML=`<span class="sync-dot ${live?'live':'local'}"></span>${live?'Live — syncing in real-time':'Local only'}`;
+}
+function loadLocalBookings(){try{allBookings=JSON.parse(localStorage.getItem('tripbook_private_v3')||'[]');}catch{allBookings=[];}applyFilters();}
+
+// ── FLEET + DATE FILTER HELPERS ────────────────────────────────────────────
+const FLEET=['KCA','KCC','KBV','KDV','KBP'];
+window.setBusFilter=function(bus){
+  activeBus=bus;
+  document.querySelectorAll('.bus-pill').forEach(p=>{
+    p.classList.remove('active');
+    const isBusClass=FLEET.some(b=>p.classList.contains('bus-'+b));
+    if(bus===''&&p.classList.contains('all')) p.classList.add('active');
+    else if(bus!==''&&p.classList.contains('bus-'+bus)) p.classList.add('active');
+  });
+  applyFilters();
+};
+window.setToday=function(){
+  document.getElementById('dateFrom').value=new Date().toISOString().split('T')[0];
+  document.getElementById('dateTo').value='';
+  applyFilters();
+};
+window.clearDateFilter=function(){
+  document.getElementById('dateFrom').value='';
+  document.getElementById('dateTo').value='';
+  applyFilters();
+};
+window.applyFilters=function(){
+  const text=(document.getElementById('textSearch')?.value||'').toLowerCase().trim();
+  const from=document.getElementById('dateFrom')?.value||'';
+  const to=document.getElementById('dateTo')?.value||'';
+  renderTable(text,from,to);
+};
+
+// ── TABLE ──────────────────────────────────────────────────────────────────
+window.renderTable=function(search='',dateFrom='',dateTo=''){
+  let data=[...allBookings].sort((a,b)=>a.date>b.date?1:-1);
+  // text filter
+  if(search){const q=search.toLowerCase();data=data.filter(b=>[b.name,b.from,b.to,b.phone,b.ref,b.notes,b.date,b.bus].join(' ').toLowerCase().includes(q));}
+  // bus filter
+  if(activeBus) data=data.filter(b=>b.bus===activeBus);
+  // date filter: only From = exact day; From + To = range; only To = up to date
+  if(dateFrom&&dateTo)  data=data.filter(b=>b.date>=dateFrom&&b.date<=dateTo);
+  else if(dateFrom)     data=data.filter(b=>b.date===dateFrom);
+  else if(dateTo)       data=data.filter(b=>b.date<=dateTo);
+  // update filter count badge
+  const totalAll=allBookings.length;
+  const fcEl=document.getElementById('filterCount');
+  if(fcEl) fcEl.textContent=data.length===totalAll?`${totalAll} bookings`:`Showing ${data.length} of ${totalAll}`;
+  const totalRev=data.reduce((s,b)=>s+(+b.total||0),0);
+  const doubles=data.filter(b=>b.isDouble).length;
+  const pending=data.filter(b=>!b.feeSet).length;
+  // per-bus revenue mini stats when All selected
+  const busStats=activeBus?'':FLEET.map(bus=>{
+    const bData=allBookings.filter(b=>b.bus===bus);
+    const bRev=bData.reduce((s,b)=>s+(+b.total||0),0);
+    const busColors={KCA:'#64b5f6',KCC:'#81c784',KBV:'#ce93d8',KDV:'#ffd54f',KBP:'#ef9a9a'};
+    return`<div class="stat" style="cursor:pointer" onclick="setBusFilter('${bus}')">
+      <strong style="font-size:1rem;color:${busColors[bus]}">${bus}</strong>
+      <span>${bData.length} trips · KSh ${bRev.toLocaleString()}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat"><strong>${data.length}</strong><span>${activeBus?activeBus+' Bookings':'Total Bookings'}</span></div>
+    <div class="stat ok"><strong>KSh ${totalRev.toLocaleString()}</strong><span>Revenue</span></div>
+    <div class="stat warn"><strong>${doubles}</strong><span>Double-Bookings ⚠</span></div>
+    <div class="stat pend"><strong>${pending}</strong><span>Fees Pending ⏳</span></div>
+    ${busStats}`;
+  const tbody=document.getElementById('tBody');
+  if(!data.length){
+    const msg=activeBus||dateFrom
+      ?`No bookings found. <span style="color:var(--gold);cursor:pointer" onclick="activeBus='';clearDateFilter()">Clear filters</span>`
+      :'No bookings found';
+    tbody.innerHTML=`<tr><td colspan="14" style="text-align:center;padding:2rem;color:var(--muted)">${msg}</td></tr>`;
+    return;
+  }
+  const busColors={KCA:'#64b5f6',KCC:'#81c784',KBV:'#ce93d8',KDV:'#ffd54f',KBP:'#ef9a9a'};
+  tbody.innerHTML=data.map((b,i)=>{
+    const statusColor=b.status==='Confirmed'?'#81c784':b.status==='Cancelled'?'#ef9a9a':b.status==='Completed'?'var(--gold)':'var(--muted)';
+    const busBg={KCA:'#1a3a5a',KCC:'#1a3a1a',KBV:'#2e1a3a',KDV:'#3a2c10',KBP:'#3a1a1a'};
+    const busClr={KCA:'#64b5f6',KCC:'#81c784',KBV:'#ce93d8',KDV:'#ffd54f',KBP:'#ef9a9a'};
+    const busCell=b.bus
+      ?'<span style="display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.7rem;font-weight:800;background:'+( busBg[b.bus]||'#2e2820')+'!important;color:'+(busClr[b.bus]||'var(--muted)')+'">'+b.bus+'</span>'
+      :'<span style="font-size:0.7rem;color:var(--muted)">&#8212;</span>';
+    const km_cell=b.feeSet
+      ?'<span style="color:var(--gold)">'+b.km+' km</span>'
+      :'<input class="fi" type="number" placeholder="KM" value="'+(b.km||'')+'" id="km-'+b.ref+'"/>';
+    const fee_cell=b.feeSet
+      ?'<strong style="color:#81c784">KSh '+Number(b.total).toLocaleString()+'</strong>'
+      :'<div style="display:flex;flex-direction:column;gap:2px"><input class="fi" type="number" placeholder="KSh/km" value="'+(b.ppkm||DEF_PPKM)+'" id="ppkm-'+b.ref+'"/><input class="fi" type="number" placeholder="Driver" value="'+(b.driver||DEF_DRIVER)+'" id="drv-'+b.ref+'"/></div>';
+    const action_cell=b.feeSet
+      ?'<a class="wa-btn" href="'+waLink(b.phone,buildFeeMsg(b))+'" target="_blank">&#128172; Resend</a>'
+      :'<button class="set-btn" onclick="saveFee(&#39;'+b.ref+'&#39;,&#39;'+(b.id||'')+'&#39;)">&#10003; Set &amp; Send</button>';
+    const status_cell='<span class="sbadge '+(b.isDouble?'s-dbl':'s-ok')+'" style="'+(b.status?'color:'+statusColor:'')+'">'+(b.status||(b.isDouble?'Double':'OK'))+'</span>';
+    return '<tr>'
+      +'<td style="color:var(--muted)">'+(i+1)+'</td>'
+      +'<td style="font-weight:700;color:var(--gold);white-space:nowrap">'+b.ref+'</td>'
+      +'<td>'+busCell+'</td>'
+      +'<td style="white-space:nowrap">'+b.date+'</td>'
+      +'<td style="white-space:nowrap">'+(b.day||'&#8212;')+'</td>'
+      +'<td><strong>'+(b.name||'&#8212;')+'</strong></td>'
+      +'<td><a class="wa-btn" href="https://wa.me/'+b.phone+'" target="_blank">+'+(b.phone||'&#8212;')+'</a></td>'
+      +'<td style="white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis">'+(b.from||'?')+' &#8594; '+(b.to||'?')+'</td>'
+      +'<td style="max-width:130px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)">'+(b.notes||'&#8212;')+'</td>'
+      +'<td>'+km_cell+'</td>'
+      +'<td>'+fee_cell+'</td>'
+      +'<td>'+action_cell+'</td>'
+      +'<td>'+status_cell+'</td>'
+      +'<td><button class="edit-btn" onclick="openEditModal(&#39;'+b.ref+'&#39;)">&#9999;&#65039; Edit</button></td>'
+      +'</tr>';
+  }).join('');
+};
+
+window.saveFee=async function(ref,docId){
+  const km=parseFloat(document.getElementById('km-'+ref)?.value)||0;
+  const ppkm=parseFloat(document.getElementById('ppkm-'+ref)?.value)||DEF_PPKM;
+  const drv=parseFloat(document.getElementById('drv-'+ref)?.value)||DEF_DRIVER;
+  const total=(km*ppkm)+drv;
+  const updates={km,ppkm,driver:drv,total,feeSet:true};
+  if(db&&docId){try{await updateDoc(doc(db,'bookings',docId),updates);}catch(e){console.error(e);}}
+  const idx=allBookings.findIndex(b=>b.ref===ref);
+  if(idx>-1)allBookings[idx]={...allBookings[idx],...updates};
+  const booking=allBookings.find(b=>b.ref===ref);
+  if(booking)window.open(waLink(booking.phone,buildFeeMsg({...booking,...updates})),'_blank');
+  applyFilters();
+};
+
+// ── EDIT BOOKING MODAL ─────────────────────────────────────────────────────
+window.openEditModal=function(ref){
+  const b=allBookings.find(x=>x.ref===ref); if(!b) return;
+  document.getElementById('edit-ref').value=ref;
+  document.getElementById('edit-docid').value=b.id||'';
+  document.getElementById('edit-date').value=b.date||'';
+  document.getElementById('edit-name').value=b.name||'';
+  document.getElementById('edit-phone').value=b.phone||'';
+  document.getElementById('edit-from').value=b.from||'';
+  document.getElementById('edit-to').value=b.to||'';
+  document.getElementById('edit-notes').value=b.notes||'';
+  document.getElementById('edit-status').value=b.status||'';
+  document.getElementById('edit-bus').value=b.bus||'';
+  document.getElementById('edit-err').textContent='';
+  document.getElementById('editOverlay').classList.add('open');
+};
+window.closeEditModal=()=>document.getElementById('editOverlay').classList.remove('open');
+window.saveEditBooking=async function(){
+  const ref=document.getElementById('edit-ref').value;
+  const docId=document.getElementById('edit-docid').value;
+  const updates={
+    date:document.getElementById('edit-date').value,
+    name:document.getElementById('edit-name').value.trim(),
+    phone:document.getElementById('edit-phone').value.trim(),
+    from:document.getElementById('edit-from').value.trim(),
+    to:document.getElementById('edit-to').value.trim(),
+    notes:document.getElementById('edit-notes').value.trim(),
+    status:document.getElementById('edit-status').value,
+    bus:document.getElementById('edit-bus').value,
+  };
+  if(!updates.name||!updates.date){document.getElementById('edit-err').textContent='❌ Name and date are required.';return;}
+  if(db&&docId){try{await updateDoc(doc(db,'bookings',docId),updates);}catch(e){console.error(e);document.getElementById('edit-err').textContent='❌ Failed to save. Try again.';return;}}
+  const idx=allBookings.findIndex(b=>b.ref===ref);
+  if(idx>-1)allBookings[idx]={...allBookings[idx],...updates};
+  closeEditModal(); applyFilters();
+};
+window.deleteBooking=async function(){
+  const ref=document.getElementById('edit-ref').value;
+  const docId=document.getElementById('edit-docid').value;
+  if(!confirm(`⚠️ Delete booking ${ref}? This cannot be undone.`))return;
+  if(db&&docId){try{await deleteDoc(doc(db,'bookings',docId));}catch(e){console.error(e);alert('❌ Failed to delete.');return;}}
+  allBookings=allBookings.filter(b=>b.ref!==ref);
+  closeEditModal(); applyFilters();
+};
+document.getElementById('editOverlay').addEventListener('click',function(e){if(e.target===this)closeEditModal();});
+
+// ── WHATSAPP ───────────────────────────────────────────────────────────────
+function waLink(p,m){return`https://wa.me/${p}?text=${encodeURIComponent(m)}`;}
+function buildFeeMsg(b){
+  const d=new Date(b.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  return`🚌 *${BIZ_NAME} — Trip Fee*\n\n📋 *Reference:* ${b.ref}\n📅 *Date:* ${d}\n🗺 *Route:* ${b.from||'?'} → ${b.to||'?'}\n📏 *Distance:* ${b.km} km\n💰 *Total Fee: KSh ${Number(b.total).toLocaleString()}*\n\n_Please confirm and prepare payment before the trip date._\nThank you! 🙏`;
+}
+
+// ── SETTINGS FORM ──────────────────────────────────────────────────────────
+function loadSettingsForm(){
+  document.getElementById('s-phone').value=getSetting('admin_phone','254712000000');
+  document.getElementById('s-bizname').value=getSetting('biz_name','Senator Mugambi Imanyara');
+  document.getElementById('s-ppkm').value=getSetting('def_ppkm','50');
+  document.getElementById('s-driver').value=getSetting('def_driver','1500');
+  const cfg=getSavedConfig()||{};
+  document.getElementById('s-apikey').value=cfg.apiKey||'';
+  document.getElementById('s-projectid').value=cfg.projectId||'';
+  document.getElementById('s-appid').value=cfg.appId||'';
+  document.getElementById('s-senderid').value=cfg.senderId||'';
+  // Message preview
+  document.getElementById('msgPreview').textContent=
+    `🚌 ${BIZ_NAME} — Trip Fee\n\n📋 Reference: BK1234XY\n📅 Date: Monday, 15 June 2026\n🗺 Route: Meru → Nairobi\n📏 Distance: 200 km\n💰 Total Fee: KSh 11,500\n\nPlease confirm and prepare payment before the trip date.\nThank you! 🙏`;
+}
+
+window.saveSettingPhone=async function(){
+  const p=document.getElementById('s-phone').value.trim();
+  if(!p||p.length<9){showOk('s-phone-ok','❌ Enter a valid number.',true);return;}
+  ADMIN_PHONE=p; saveSetting('admin_phone',p);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{adminPhone:p},{merge:true});}catch(e){console.error(e);}}
+  showOk('s-phone-ok','✅ Saved!');
+  applyFilters();
+};
+
+window.saveSettingBizName=async function(){
+  const v=document.getElementById('s-bizname').value.trim();
+  if(!v){showOk('s-bizname-ok','❌ Enter a name.',true);return;}
+  BIZ_NAME=v; saveSetting('biz_name',v);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{bizName:v},{merge:true});}catch(e){console.error(e);}}
+  showOk('s-bizname-ok','✅ Saved!');
+  loadSettingsForm();
+};
+
+window.saveSettingRates=async function(){
+  const ppkm=parseFloat(document.getElementById('s-ppkm').value)||50;
+  const driver=parseFloat(document.getElementById('s-driver').value)||1500;
+  DEF_PPKM=ppkm; DEF_DRIVER=driver;
+  saveSetting('def_ppkm',ppkm); saveSetting('def_driver',driver);
+  if(db){try{await setDoc(doc(db,'meta','settings'),{defPpkm:ppkm,defDriver:driver},{merge:true});}catch(e){console.error(e);}}
+  showOk('s-rates-ok','✅ Saved! New bookings will use these defaults.');
+};
+
+window.saveSettingPass=function(){
+  const cur=document.getElementById('s-curpass').value;
+  const nw=document.getElementById('s-newpass').value.trim();
+  const cn=document.getElementById('s-conpass').value;
+  const err=document.getElementById('s-pass-err');
+  if(cur!==getAdminPass()){err.textContent='❌ Current password is wrong.';return;}
+  if(nw.length<6){err.textContent='❌ Must be at least 6 characters.';return;}
+  if(nw!==cn){err.textContent='❌ Passwords do not match.';return;}
+  localStorage.setItem('tripbook_admin_pass',nw);
+  err.style.color='#81c784'; err.textContent='✅ Password changed successfully!';
+  ['s-curpass','s-newpass','s-conpass'].forEach(id=>document.getElementById(id).value='');
+};
+
+window.saveSettingFirebase=function(){
+  const cfg={
+    apiKey:document.getElementById('s-apikey').value.trim(),
+    projectId:document.getElementById('s-projectid').value.trim(),
+    appId:document.getElementById('s-appid').value.trim(),
+    senderId:document.getElementById('s-senderid').value.trim()
+  };
+  if(!cfg.apiKey||!cfg.projectId){showOk('s-firebase-ok','❌ API Key and Project ID required.',true);return;}
+  localStorage.setItem('tripbook_firebase_config',JSON.stringify(cfg));
+  showOk('s-firebase-ok','✅ Saved! Reconnecting...');
+  setTimeout(()=>{if(unsubscribe)unsubscribe();initFirebase(buildConfig(cfg));},1000);
+};
+
+window.clearLocalData=function(){
+  if(!confirm('⚠️ Clear all local booking data? Firebase data is NOT affected.'))return;
+  localStorage.removeItem('tripbook_private_v3');
+  localStorage.removeItem('tripbook_shared_v3');
+  alert('✅ Local data cleared.');
+};
+
+window.disconnectFirebase=function(){
+  if(!confirm('⚠️ Disconnect Firebase? You will need to re-enter config on next login.'))return;
+  localStorage.removeItem('tripbook_firebase_config');
+  if(unsubscribe)unsubscribe();
+  alert('✅ Firebase disconnected. Reload the page to reconnect.');
+};
+
+function showOk(id,msg,isErr=false){
+  const el=document.getElementById(id);
+  el.style.color=isErr?'#e74c3c':'#81c784';
+  el.textContent=msg;
+  if(!isErr)setTimeout(()=>el.textContent='',3000);
+}
+
+// ── ADD BOOKING ────────────────────────────────────────────────────────────
+window.openAddModal=function(){
+  // Set today's date as default
+  document.getElementById('add-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('add-ppkm').value=DEF_PPKM;
+  document.getElementById('add-driver').value=DEF_DRIVER;
+  ['add-name','add-phone','add-from','add-to','add-notes','add-km','add-total'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('add-bus').value='';
+  document.getElementById('add-err').textContent='';
+  document.getElementById('addOverlay').classList.add('open');
+};
+window.closeAddModal=()=>document.getElementById('addOverlay').classList.remove('open');
+
+// Auto-calc total when km changes
+document.getElementById('add-km').addEventListener('input',function(){
+  const km=parseFloat(this.value)||0;
+  const ppkm=parseFloat(document.getElementById('add-ppkm').value)||DEF_PPKM;
+  const drv=parseFloat(document.getElementById('add-driver').value)||DEF_DRIVER;
+  if(km>0) document.getElementById('add-total').value=Math.round(km*ppkm+drv);
+});
+
+window.saveNewBooking=async function(){
+  const date=document.getElementById('add-date').value;
+  const name=document.getElementById('add-name').value.trim();
+  if(!date||!name){document.getElementById('add-err').textContent='❌ Date and Name are required.';return;}
+  const km=parseFloat(document.getElementById('add-km').value)||null;
+  const ppkm=parseFloat(document.getElementById('add-ppkm').value)||DEF_PPKM;
+  const drv=parseFloat(document.getElementById('add-driver').value)||DEF_DRIVER;
+  const totalInput=parseFloat(document.getElementById('add-total').value)||null;
+  const total=totalInput||(km?(km*ppkm+drv):null);
+  // Generate ref
+  const existingRefs=allBookings.map(b=>b.ref).filter(r=>r.startsWith('BK'));
+  const nextNum=existingRefs.length>0?Math.max(...existingRefs.map(r=>parseInt(r.slice(2))||0))+1:1;
+  const ref='BK'+String(nextNum).padStart(4,'0');
+  const phone=document.getElementById('add-phone').value.trim().replace(/\s/g,'');
+  const booking={
+    ref, date,
+    day:new Date(date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long'}),
+    name, phone,
+    from:document.getElementById('add-from').value.trim(),
+    to:document.getElementById('add-to').value.trim(),
+    notes:document.getElementById('add-notes').value.trim(),
+    km, ppkm, driver:drv, total,
+    feeSet:total!==null,
+    status:document.getElementById('add-status').value,
+    isDouble:allBookings.some(b=>b.date===date),
+    bus:document.getElementById('add-bus').value,
+    createdAt:new Date().toISOString()
+  };
+  if(db){
+    try{
+      const{addDoc,collection:col}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+      await addDoc(col(db,'bookings'),booking);
+    }catch(e){console.error(e);document.getElementById('add-err').textContent='❌ Firebase error: '+e.message;return;}
+  } else {
+    allBookings.push(booking);
+    applyFilters();
+  }
+  closeAddModal();
+  // Open WhatsApp if fee set and phone available
+  if(booking.feeSet&&booking.phone&&booking.phone.length>6){
+    if(confirm('Booking saved! Send fee via WhatsApp now?')){
+      window.open(waLink(booking.phone,buildFeeMsg(booking)),'_blank');
+    }
+  }
+};
+document.getElementById('addOverlay').addEventListener('click',function(e){if(e.target===this)closeAddModal();});
+
+// ── WEEKLY REPORT ──────────────────────────────────────────────────────────
+// Set default week to current Monday
+(function(){
+  const d=new Date();
+  const day=d.getDay();
+  const diff=d.getDate()-day+(day===0?-6:1);
+  const monday=new Date(d.setDate(diff));
+  document.getElementById('week-start').value=monday.toISOString().split('T')[0];
+})();
+
+function getWeekBookings(){
+  const start=document.getElementById('week-start').value;
+  if(!start)return{bookings:[],start:'',end:''};
+  const startDate=new Date(start+'T00:00:00');
+  const endDate=new Date(startDate);
+  endDate.setDate(endDate.getDate()+6);
+  const endStr=endDate.toISOString().split('T')[0];
+  const weekBks=allBookings.filter(b=>b.date>=start&&b.date<=endStr)
+    .sort((a,b)=>a.date>b.date?1:-1);
+  return{bookings:weekBks,start,end:endStr,startDate,endDate};
+}
+
+window.genWeekReport=function(){
+  const{bookings,start,end,startDate,endDate}=getWeekBookings();
+  const out=document.getElementById('week-report-out');
+  out.style.display='block';
+  if(!start){out.textContent='Please select a week start date.';return;}
+  const fmtDate=d=>new Date(d+'T00:00:00').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
+  const fmtFull=d=>d.toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const totalRev=bookings.reduce((s,b)=>s+(+b.total||0),0);
+  const doubles=bookings.filter(b=>b.isDouble);
+  const pending=bookings.filter(b=>!b.feeSet);
+
+  let report=`╔══════════════════════════════════════════════╗\n`;
+  report+=`║     TRIPBOOK — WEEKLY BOOKING REPORT         ║\n`;
+  report+=`║     ${BIZ_NAME.padEnd(42)}║\n`;
+  report+=`╚══════════════════════════════════════════════╝\n\n`;
+  report+=`📅 Week: ${fmtFull(startDate)} — ${fmtFull(endDate)}\n`;
+  report+=`📊 Total Bookings: ${bookings.length}\n`;
+  report+=`💰 Total Revenue:  KSh ${totalRev.toLocaleString()}\n`;
+  report+=`⚠️  Double-Books:   ${doubles.length}\n`;
+  report+=`⏳ Fees Pending:   ${pending.length}\n`;
+  report+=`\n${'─'.repeat(48)}\n`;
+  report+=`BOOKING DETAILS\n${'─'.repeat(48)}\n\n`;
+
+  if(bookings.length===0){
+    report+='No bookings found for this week.\n';
+  } else {
+    bookings.forEach((b,i)=>{
+      report+=`${i+1}. [${b.ref}] ${fmtDate(b.date)}\n`;
+      report+=`   👤 ${b.name||'(no name)'}   📞 ${b.phone?'+'+b.phone:'—'}\n`;
+      if(b.from||b.to) report+=`   🗺  ${b.from||'?'} → ${b.to||'?'}\n`;
+      if(b.notes) report+=`   📝 ${b.notes}\n`;
+      if(b.km) report+=`   📏 ${b.km} km\n`;
+      report+=`   💰 ${b.feeSet?`KSh ${Number(b.total).toLocaleString()}`:'Fee not set yet'}\n`;
+      report+=`   📌 Status: ${b.status||'—'}${b.isDouble?' ⚠️ DOUBLE-BOOK':''}\n\n`;
+    });
+  }
+
+  report+=`${'─'.repeat(48)}\n`;
+  report+=`Generated: ${new Date().toLocaleString('en-GB')}\n`;
+  report+=`TripBook Admin System`;
+  out.textContent=report;
+  // Store for print/share
+  window._weekReport=report;
+  window._weekBookings=bookings;
+};
+
+window.printWeekReport=function(){
+  if(!window._weekReport){genWeekReport();}
+  const w=window.open('','_blank');
+  w.document.write(`<html><head><title>Weekly Report</title>
+  <style>body{font-family:monospace;font-size:13px;padding:2rem;white-space:pre-wrap}
+  @media print{body{font-size:11px}}</style></head>
+  <body></body></html>`);
+  w.document.close();
+  w.document.body.textContent=window._weekReport;
+  w.print();
+};
+
+window.shareWeekReport=function(){
+  if(!window._weekReport){genWeekReport();}
+  const phone=getSetting('admin_phone','254712000000');
+  window.open(waLink(phone,window._weekReport),'_blank');
+};
+
+window.exportWeekExcel=function(){
+  const{bookings,start,end}=getWeekBookings();
+  if(!bookings.length){alert('No bookings for this week.');return;}
+  const rows=[['Ref','Date','Day','Name','WhatsApp','From','To','Notes','KM','Price/KM','Driver Fee','Total','Status','Double-Book']];
+  bookings.forEach(b=>rows.push([b.ref,b.date,b.day,b.name,b.phone?'+'+b.phone:'',b.from,b.to,b.notes,b.km,b.ppkm,b.driver,b.total,b.status,b.isDouble?'YES':'NO']));
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,'Week Report',ws);
+  XLSX.writeFile(wb,`TripBook_Week_${start}.xlsx`);
+};
+
+// ── AI INSIGHTS ────────────────────────────────────────────────────────────
+function getAiKey(){return localStorage.getItem('tripbook_ai_key')||'';}
+window.saveApiKey=function(){
+  const k=document.getElementById('ai-apikey').value.trim();
+  if(!k.startsWith('sk-ant-')){showOk('ai-key-ok','❌ Key must start with sk-ant-',true);return;}
+  localStorage.setItem('tripbook_ai_key',k);
+  showOk('ai-key-ok','✅ API Key saved!');
+};
+
+// Load saved key on tab open
+function loadAiKey(){
+  const k=getAiKey();
+  if(k) document.getElementById('ai-apikey').value=k;
+}
+
+function buildDataSummary(){
+  const total=allBookings.length;
+  const rev=allBookings.reduce((s,b)=>s+(+b.total||0),0);
+  const withFee=allBookings.filter(b=>b.feeSet);
+  const avgFee=withFee.length?Math.round(withFee.reduce((s,b)=>s+(+b.total||0),0)/withFee.length):0;
+  const doubles=allBookings.filter(b=>b.isDouble).length;
+  const pending=allBookings.filter(b=>!b.feeSet).length;
+  // Routes
+  const routes={};
+  allBookings.forEach(b=>{const r=`${b.from||'?'} → ${b.to||'?'}`;routes[r]=(routes[r]||0)+1;});
+  const topRoutes=Object.entries(routes).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([r,c])=>`${r} (${c}x)`).join(', ');
+  // Days
+  const days={};
+  allBookings.forEach(b=>{const d=b.day||new Date(b.date+'T00:00:00').toLocaleDateString('en-GB',{weekday:'long'});days[d]=(days[d]||0)+1;});
+  const topDays=Object.entries(days).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([d,c])=>`${d}(${c})`).join(', ');
+  // Clients
+  const clients={};
+  allBookings.forEach(b=>{if(b.name)clients[b.name]=(clients[b.name]||0)+1;});
+  const topClients=Object.entries(clients).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([n,c])=>`${n}(${c}x)`).join(', ');
+  // Months
+  const months={};
+  allBookings.forEach(b=>{const m=b.date?.slice(0,7);if(m)months[m]=(months[m]||0)+1;});
+  const topMonths=Object.entries(months).sort((a,b)=>b[1]-a[1]).slice(0,4).map(([m,c])=>`${m}(${c})`).join(', ');
+
+  return `Business: ${BIZ_NAME}. Total bookings: ${total}. Total revenue: KSh ${rev.toLocaleString()}. Average fee per trip: KSh ${avgFee.toLocaleString()}. Double-bookings: ${doubles}. Pending fees: ${pending}. Top routes: ${topRoutes}. Busiest days: ${topDays}. Top clients: ${topClients}. Busiest months: ${topMonths}. Date range: ${allBookings[0]?.date||'?'} to ${allBookings[allBookings.length-1]?.date||'?'}.`;
+}
+
+const AI_PROMPTS={
+  revenue:`You are a business analyst. Here is booking data for a Kenyan bus operator: {DATA}. Give a clear revenue analysis in plain English: total earned, best months, average per trip, and 2-3 specific ways to increase revenue. Be concise and practical.`,
+  routes:`You are a transport business advisor. Here is booking data: {DATA}. Analyse the routes and days. Which routes are most popular? Which days are busiest? What does this mean for the business? Give 2-3 practical recommendations. Be concise.`,
+  clients:`You are a CRM advisor. Here is booking data: {DATA}. Identify the top repeat clients. Who should the operator follow up with this week? Are there any patterns in client behaviour? Give actionable suggestions. Be concise.`,
+  pricing:`You are a pricing consultant. Here is booking data: {DATA}. Are the fees competitive? Any routes that seem underpriced given the distance? Should the operator charge more on busy days? Give 3 specific pricing recommendations in KSh. Be concise.`,
+  summary:`You are a business advisor for a Kenyan bus operator. Here is their complete booking data: {DATA}. Give a full business summary covering: revenue performance, operational patterns, client relationships, pricing, and 5 specific action items to grow the business. Format clearly with sections.`
+};
+
+window.runAI=async function(type){
+  const key=getAiKey();
+  if(!key){alert('Please enter your Claude API key first in the API Key section above.');return;}
+  const outEl=document.getElementById('ai-'+type);
+  outEl.className='ai-output loading';
+  outEl.textContent='🤖 Analysing your data...';
+  const data=buildDataSummary();
+  const prompt=AI_PROMPTS[type].replace('{DATA}',data);
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:800,messages:[{role:'user',content:prompt}]})
+    });
+    const json=await res.json();
+    if(json.error){throw new Error(json.error.message);}
+    outEl.className='ai-output';
+    outEl.textContent=json.content[0].text;
+  }catch(e){
+    outEl.className='ai-output error';
+    outEl.textContent='❌ Error: '+e.message+'\n\nMake sure your API key is correct.';
+  }
+};
+
+let _askAIOpen=false;
+window.askAI=async function(){
+  const ta=document.getElementById('ai-question');
+  if(!_askAIOpen){
+    _askAIOpen=true;
+    ta.style.display='block';
+    ta.focus();
+    document.getElementById('ai-summary').textContent='Type your question above then click Ask AI Anything again.';
+    return;
+  }
+  const q=ta.value.trim();
+  if(!q){alert('Please type a question.');return;}
+  const key=getAiKey();
+  if(!key){alert('Please enter your Claude API key first.');return;}
+  const outEl=document.getElementById('ai-summary');
+  outEl.className='ai-output loading';
+  outEl.textContent='🤖 Thinking...';
+  const data=buildDataSummary();
+  const prompt=`You are a helpful business advisor for a Kenyan bus operator. Their booking data: ${data}. The operator asks: "${q}". Give a helpful, practical answer.`;
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,messages:[{role:'user',content:prompt}]})
+    });
+    const json=await res.json();
+    if(json.error)throw new Error(json.error.message);
+    outEl.className='ai-output';
+    outEl.textContent=json.content[0].text;
+    _askAIOpen=false;
+    ta.style.display='none';
+    ta.value='';
+  }catch(e){
+    outEl.className='ai-output error';
+    outEl.textContent='❌ '+e.message;
+  }
+};
+
+// ── EXPORT ─────────────────────────────────────────────────────────────────
+window.exportExcel=function(){
+  const rows=[['Ref','Bus','Date','Day','Name','WhatsApp','From','To','Notes','KM','Price/KM','Driver Fee','Total Fee','Double-Book','Status']];
+  [...allBookings].sort((a,b)=>a.date>b.date?1:-1).forEach(b=>{
+    rows.push([b.ref,b.bus||'—',b.date,b.day,b.name,'+'+b.phone,b.from,b.to,b.notes,b.km,b.ppkm,b.driver,b.total,b.isDouble?'YES':'NO',b.status||'']);
+  });
+  const ws=XLSX.utils.aoa_to_sheet(rows);
+  ws['!cols']=[{wch:10},{wch:12},{wch:10},{wch:10},{wch:18},{wch:16},{wch:20},{wch:20},{wch:25},{wch:7},{wch:10},{wch:12},{wch:12},{wch:10},{wch:12}];
+  const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,'Bookings',ws);
+  XLSX.writeFile(wb,'TripBookings_'+new Date().toISOString().split('T')[0]+'.xlsx');
+};
+</script>
+</body>
+</html>
